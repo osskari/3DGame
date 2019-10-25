@@ -8,6 +8,8 @@ from pygame.locals import *
 import sys
 import time
 
+from aabbtree import AABB, AABBTree
+
 from Shaders import *
 from Matrices import *
 
@@ -27,7 +29,6 @@ class GraphicsProgram3D:
         self.view_matrix.look(Point(0, 3, 10), Point(0, 0, 0), Vector(0, 1, 0))
 
         self.projection_matrix = ProjectionMatrix()
-        # self.projection_matrix.set_orthographic(-2, 2, -2, 2, 0.5, 10)
         self.projection_matrix.set_perspective(pi/2, 800/600, 0.5, 100)
         self.shader.set_projection_matrix(self.projection_matrix.get_matrix())
 
@@ -37,6 +38,17 @@ class GraphicsProgram3D:
         self.clock.tick()
 
         self.angle = 0
+
+        self.tree = AABBTree()
+
+        self.cube1 = (Point(9.0, 5.0, -2.0), (2.0, 2.0, 2.0),
+                      (1.0, 0.5, 0.0), (1.0, 1.0, 1.0), 13)
+        self.tree.add(
+            AABB([(9.0-2.0, 9.0+2.0), (5.0-2.0, 5.0+2.0), (-2.0-2.0, -2.0+2.0)]))
+        self.cube2 = (Point(-5.0, -0.8, -5.0), (10.0, 0.8, 10.0),
+                      (0.0, 1.0, 0.0), (1.0, 1.0, 1.0), 13)
+        self.tree.add(
+            AABB([(-5.0-10.0, -5.0+10.0), (-0.8-0.8, -0.8+0.8), (-5.0-10.0, -5.0+10.0)]))
 
         self.inputs = {
             "W": False,
@@ -80,6 +92,10 @@ class GraphicsProgram3D:
             self.view_matrix.yaw(-pi * delta_time)
         if self.inputs["RIGHT"]:
             self.view_matrix.yaw(pi * delta_time)
+        eyebound = (self.view_matrix.eye.x, self.view_matrix.eye.y,
+                    self.view_matrix.eye.z, 0.2)
+        if(self.tree.does_overlap(AABB([(eyebound[0] - eyebound[3], eyebound[0] + eyebound[3]), (eyebound[1] - eyebound[3], eyebound[1] + eyebound[3]), (eyebound[2] - eyebound[3], eyebound[2] + eyebound[3])]))):
+            print("hebbo")
 
     def display(self):
         glEnable(GL_DEPTH_TEST)
@@ -107,7 +123,7 @@ class GraphicsProgram3D:
 
         self.cube.set_vertices(self.shader)
 
-        self.shader.set_material_diffuse(1.0, 0.0, 0.0)
+        self.shader.set_material_diffuse(1.0, 0.5, 0.0)
         self.model_matrix.push_matrix()
         self.model_matrix.add_translation(9.0, 5.0, -2.0)
         self.model_matrix.add_scale(2.0, 2.0, 2.0)
