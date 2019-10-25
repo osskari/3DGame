@@ -2,7 +2,7 @@
 A simple 3d game
 
 ## Pip packages
-example `python -m pip install <Package name>
+example `python -m pip install "Package name"
 - pygame
 - PyOpenGL
 - numpy
