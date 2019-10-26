@@ -11,12 +11,18 @@ import time
 from Shaders import *
 from Matrices import *
 
+from SETTINGS import *
+
 
 class GraphicsProgram3D:
     def __init__(self):
 
         pygame.init()
         pygame.display.set_mode((800, 600), pygame.OPENGL | pygame.DOUBLEBUF)
+        # Hide cursor and lock mouse
+        # Commenta þetta út ef það er pirrandi í development.
+        pygame.mouse.set_visible(False)
+        pygame.event.set_grab(True)
 
         self.shader = Shader3D()
         self.shader.use()
@@ -51,6 +57,13 @@ class GraphicsProgram3D:
             "E": False
         }
 
+        #Initialize variable that tracks how much mouse movement there is each frame
+        self.mouse_move = (0, 0)
+        #bool to ignore first mouse movement
+        self.first_move = True
+
+
+
         self.white_background = False
 
     def update(self):
@@ -81,6 +94,36 @@ class GraphicsProgram3D:
         if self.inputs["RIGHT"]:
             self.view_matrix.yaw(pi * delta_time)
 
+        self.mouse_look_movement(delta_time)
+
+    def mouse_look_movement(self, delta_time):
+        """
+        Function that handles looking around the game using mouse movement
+        param delta_time: Elapsed time since last frame
+        """
+
+        #TODO SENSITIVITY constant er 0.1, revisit til að finna rétta sensið
+        #TODO rotateY og pitch virka ekki eins, hugsanlega hafa sitthvoran constant
+        # ef að það er mikill munur á mouse movement upp/niður vs vinstri/hægri
+
+        # Change where the camera is looking based on how much mouse movement
+        # there has been since last frame
+        if self.mouse_move != (0, 0):
+            if self.mouse_move[0] < 0:
+                self.view_matrix.rotateY((self.mouse_move[0] * SENSITIVITY) * delta_time)
+            elif self.mouse_move[0] > 0:
+                self.view_matrix.rotateY((self.mouse_move[0] * SENSITIVITY) * delta_time)
+            if self.mouse_move[1] < 0:
+                # Make sure the player can not look further than straight up
+                if self.view_matrix.n.y > -0.99:
+                    self.view_matrix.pitch((self.mouse_move[1] * SENSITIVITY) * delta_time)
+            elif self.mouse_move[1] > 0:
+                # Make sure the player can not look further than straight down
+                if self.view_matrix.n.y < 0.99:
+                    self.view_matrix.pitch((self.mouse_move[1] * SENSITIVITY) * delta_time)
+        # Reset to avoid camera pan
+        self.mouse_move = (0, 0)
+    
     def display(self):
         glEnable(GL_DEPTH_TEST)
 
@@ -101,6 +144,7 @@ class GraphicsProgram3D:
 
         self.shader.set_light_specular(1.0, 1.0, 1.0)
         self.shader.set_material_specular(1.0, 1.0, 1.0)
+        self.shader.set_light_ambient(0.1, 0.1, 0.1)
         self.shader.set_material_shininess(13)
 
         self.model_matrix.load_identity()
@@ -111,6 +155,16 @@ class GraphicsProgram3D:
         self.model_matrix.push_matrix()
         self.model_matrix.add_translation(9.0, 5.0, -2.0)
         self.model_matrix.add_scale(2.0, 2.0, 2.0)
+        self.shader.set_model_matrix(self.model_matrix.matrix)
+        self.cube.draw()
+        self.model_matrix.pop_matrix()
+
+
+        self.shader.set_material_diffuse(1.0, 0.0, 0.0)
+        self.shader.set_material_specular
+        self.model_matrix.push_matrix()
+        self.model_matrix.add_translation(0.0, 0.0, 0.0)
+        self.model_matrix.add_scale(0.5, 0.5, 0.5)
         self.shader.set_model_matrix(self.model_matrix.matrix)
         self.cube.draw()
         self.model_matrix.pop_matrix()
@@ -128,7 +182,7 @@ class GraphicsProgram3D:
     def program_loop(self):
         exiting = False
         while not exiting:
-
+            pygame.mouse.set_pos = (400, 300)
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     print("Quitting!")
@@ -178,6 +232,11 @@ class GraphicsProgram3D:
                         self.inputs["LEFT"] = False
                     if event.key == K_RIGHT:
                         self.inputs["RIGHT"] = False
+                if event.type == pygame.MOUSEMOTION:
+                    self.mouse_move = event.rel
+                    if self.first_move:
+                        self.mouse_move = (0, 0)
+                        self.first_move = False
 
             self.update()
             self.display()

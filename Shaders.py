@@ -42,29 +42,22 @@ class Shader3D:
         glEnableVertexAttribArray(self.normalLoc)
 
         # self.colorLoc = glGetUniformLocation(self.renderingProgramID, "u_color")
-        self.eyePosLoc = glGetUniformLocation(
-            self.renderingProgramID, "u_eye_position")
+        self.eyePosLoc = glGetUniformLocation(self.renderingProgramID, "u_eye_position")
 
-        self.lightPosLoc = glGetUniformLocation(
-            self.renderingProgramID, "u_light_position")
-        self.lightDiffuseLoc = glGetUniformLocation(
-            self.renderingProgramID, "u_light_diffuse")
-        self.materialDiffuseLoc = glGetUniformLocation(
-            self.renderingProgramID, "u_mat_diffuse")
+        self.lightPosLoc = glGetUniformLocation(self.renderingProgramID, "u_light_position")
+        self.lightDiffuseLoc = glGetUniformLocation(self.renderingProgramID, "u_light_diffuse")
+        self.materialDiffuseLoc = glGetUniformLocation(self.renderingProgramID, "u_mat_diffuse")
 
-        self.lightSpecularLoc = glGetUniformLocation(
-            self.renderingProgramID, "u_light_specular")
-        self.materialSpecularLoc = glGetUniformLocation(
-            self.renderingProgramID, "u_mat_specular")
+        self.lightSpecularLoc = glGetUniformLocation(self.renderingProgramID, "u_light_specular")
+        self.materialSpecularLoc = glGetUniformLocation(self.renderingProgramID, "u_mat_specular")
 
-        self.modelMatrixLoc = glGetUniformLocation(
-            self.renderingProgramID, "u_model_matrix")
-        self.viewMatrixLoc = glGetUniformLocation(
-            self.renderingProgramID, "u_view_matrix")
-        self.projectionMatrixLoc = glGetUniformLocation(
-            self.renderingProgramID, "u_projection_matrix")
-        self.materialShininessLoc = glGetUniformLocation(
-            self.renderingProgramID, "u_mat_shininess")
+        self.lightAmbientLoc = glGetUniformLocation(self.renderingProgramID, "u_light_ambient")
+
+
+        self.modelMatrixLoc = glGetUniformLocation(self.renderingProgramID, "u_model_matrix")
+        self.viewMatrixLoc = glGetUniformLocation(self.renderingProgramID, "u_view_matrix")
+        self.projectionMatrixLoc = glGetUniformLocation(self.renderingProgramID, "u_projection_matrix")
+        self.materialShininessLoc = glGetUniformLocation(self.renderingProgramID, "u_mat_shininess")
 
         self.diffuseTextureLoc = glGetUniformLocation(self.renderingProgramID, "u_tex01")
         self.specularTextureLoc = glGetUniformLocation(self.renderingProgramID, "u_tex02")
@@ -103,6 +96,9 @@ class Shader3D:
 
     def set_light_diffuse(self, r, g, b):
         glUniform4f(self.lightDiffuseLoc, r, g, b, 1.0)
+
+    def set_light_ambient(self, r, g, b):
+        glUniform4f(self.lightAmbientLoc, r, g, b, 1.0)
 
     def set_material_diffuse(self, r, g, b):
         glUniform4f(self.materialDiffuseLoc, r, g, b, 1.0)
