@@ -54,8 +54,14 @@ class GraphicsProgram3D:
             "LEFT": False,
             "RIGHT": False,
             "Q": False,
-            "E": False
+            "E": False,
+            "JUMP": False
         }
+
+        # Velocity
+        self.v = VELOCITY
+        # Mass
+        self.m = MASS
 
         #Initialize variable that tracks how much mouse movement there is each frame
         self.mouse_move = (0, 0)
@@ -70,8 +76,8 @@ class GraphicsProgram3D:
         delta_time = self.clock.tick() / 1000.0
 
         self.angle += pi * delta_time
-        # if angle > 2 * pi:
-        #     angle -= (2 * pi)
+
+        self.jump(delta_time)
 
         if self.inputs["W"]:
             self.view_matrix.slide(0, 0, -10 * delta_time)
@@ -123,7 +129,35 @@ class GraphicsProgram3D:
                     self.view_matrix.pitch((self.mouse_move[1] * SENSITIVITY) * delta_time)
         # Reset to avoid camera pan
         self.mouse_move = (0, 0)
-    
+
+    def jump(self, delta_time):
+        """
+        Function that handles jumping physics
+        param delta_time: Elapsed time since last frame
+
+        Function uses a simple velocity * mass formula to calculate a jumping curve
+        """
+
+        if self.inputs["JUMP"]:
+            # Momentum = mass * velocity
+            p = (self.m * self.v)
+
+            # Change position
+            #TODO má þetta?, fokkar þetta í eitthverju að breyta bara eye en ekki hinum vector(v,n,u etc)
+            self.view_matrix.eye.y += p * delta_time
+            # Change velocity
+            self.v = self.v - 1
+
+            # Hugsanlega skoða það að breyta hvernig annað movement virkar
+            # A meðan player er að hoppa?
+            #TODO hafa annað condition fyrir til að stoppa jump ef player
+            #collide-ar við eitthvað fyrir neðan sig???
+
+            # Stop the jump when it reaches the bottom of the 'curve'
+            if self.v == -VELOCITY - 1:
+                self.inputs["JUMP"] = False
+                self.v = VELOCITY
+  
     def display(self):
         glEnable(GL_DEPTH_TEST)
 
@@ -211,6 +245,8 @@ class GraphicsProgram3D:
                         self.inputs["LEFT"] = True
                     if event.key == K_RIGHT:
                         self.inputs["RIGHT"] = True
+                    if event.key == K_SPACE:
+                        self.inputs["JUMP"] = True
                 elif event.type == pygame.KEYUP:
                     if event.key == K_w:
                         self.inputs["W"] = False
