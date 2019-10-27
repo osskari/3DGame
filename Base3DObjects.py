@@ -31,6 +31,12 @@ class Point:
         elif item == 2 or item == "Z":
             return self.z
 
+    def __str__(self):
+        return "Point(x: " + str(self.x) + ", y: " + str(self.y) + ", z: " + str(self.z) + ")"
+
+    def __repr__(self):
+        return "Point(x: " + str(self.x) + ", y: " + str(self.y) + ", z: " + str(self.z) + ")"
+
 
 class Vector:
     def __init__(self, x, y, z):

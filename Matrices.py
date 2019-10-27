@@ -33,7 +33,8 @@ class ModelMatrix:
         for row in range(4):
             for col in range(4):
                 for i in range(4):
-                    new_matrix[counter] += self.matrix[row * 4 + i] * matrix2[col + 4 * i]
+                    new_matrix[counter] += self.matrix[row *
+                                                       4 + i] * matrix2[col + 4 * i]
                 counter += 1
         self.matrix = new_matrix
 
@@ -114,9 +115,6 @@ class ViewMatrix:
         self.u = Vector(1, 0, 0)
         self.v = Vector(0, 1, 0)
         self.n = Vector(0, 0, 1)
-        self.aabb = AABB([(self.view_matrix.eye.x - 0.2, self.view_matrix.eye.x + 0.2), 
-                          (self.view_matrix.eye.y - 0.2, self.view_matrix.eye.y + 0.2), 
-                          (self.view_matrix.eye.z - 0.2, self.view_matrix.eye.z + 0.2)])
 
     def look(self, eye, center, up):
         self.eye = eye
@@ -127,8 +125,9 @@ class ViewMatrix:
         self.v = self.n.cross(self.u)
 
     def slide(self, del_u, del_v, del_n):
-        self.eye += self.u * del_u + self.v * del_v + self.n * del_n
-        self.aabb = set_aabb(point=self.eye)
+        newpos = self.eye
+        newpos += self.u * del_u + self.v * del_v + self.n * del_n
+        return newpos
 
     def roll(self, angle):
         c = cos(angle)
@@ -154,20 +153,11 @@ class ViewMatrix:
         self.n = self.u * -s + self.n * c
         self.u = tmp_u
 
-    def set_aabb(self, vector=None, point=None):
-        if vector:
-            newpos = self.eye + vector
-        elif point:
-            newpos = point
-        else
-            newpos = self.eye
-        self.aabb = newpos
-
     def walk(self, delta):
         newpos = Vector(delta * self.n.x, 0, delta * self.n.z)
-        set_aabb(vector=newpos)
+        self.set_aabb(vector=newpos)
         return newpos
-        
+
     def rotateY(self, angle):
         """
         rotates the camera yaw style regardless of the camera looking up/down
@@ -175,9 +165,12 @@ class ViewMatrix:
         #radians = angle * (pi / 180)
         c = cos(angle)
         s = sin(angle)
-        self.u = Vector(c * self.u.x - s * self.u.z, self.u.y, s * self.u.x + c * self.u.z)
-        self.v = Vector(c * self.v.x - s * self.v.z, self.v.y, s * self.v.x + c * self.v.z)
-        self.n = Vector(c * self.n.x - s * self.n.z,self.n.y, s * self.n.x + c * self.n.z)
+        self.u = Vector(c * self.u.x - s * self.u.z,
+                        self.u.y, s * self.u.x + c * self.u.z)
+        self.v = Vector(c * self.v.x - s * self.v.z,
+                        self.v.y, s * self.v.x + c * self.v.z)
+        self.n = Vector(c * self.n.x - s * self.n.z,
+                        self.n.y, s * self.n.x + c * self.n.z)
 
     def get_matrix(self):
         minusEye = Vector(-self.eye.x, -self.eye.y, -self.eye.z)
