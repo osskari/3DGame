@@ -1,5 +1,7 @@
 from math import *  # trigonometry
 
+from aabbtree import AABB
+
 from Base3DObjects import *
 
 
@@ -112,6 +114,9 @@ class ViewMatrix:
         self.u = Vector(1, 0, 0)
         self.v = Vector(0, 1, 0)
         self.n = Vector(0, 0, 1)
+        self.aabb = AABB([(self.view_matrix.eye.x - 0.2, self.view_matrix.eye.x + 0.2), 
+                          (self.view_matrix.eye.y - 0.2, self.view_matrix.eye.y + 0.2), 
+                          (self.view_matrix.eye.z - 0.2, self.view_matrix.eye.z + 0.2)])
 
     ## MAKE OPERATIONS TO ADD LOOK, SLIDE, PITCH, YAW and ROLL ##
     # ---
@@ -125,6 +130,7 @@ class ViewMatrix:
 
     def slide(self, del_u, del_v, del_n):
         self.eye += self.u * del_u + self.v * del_v + self.n * del_n
+        self.aabb = set_aabb(point=self.eye)
 
     def roll(self, angle):
         c = cos(angle)
@@ -149,6 +155,20 @@ class ViewMatrix:
         tmp_u = self.u * c + self.n * s
         self.n = self.u * -s + self.n * c
         self.u = tmp_u
+
+    def set_aabb(self, vector=None, point=None):
+        if vector:
+            newpos = self.eye + vector
+        elif point:
+            newpos = point
+        else
+            newpos = self.eye
+        self.aabb = newpos
+
+    def walk(self, delta):
+        newpos = Vector(delta * self.n.x, 0, delta * self.n.z)
+        set_aabb(vector=newpos)
+        return newpos
 
     def get_matrix(self):
         minusEye = Vector(-self.eye.x, -self.eye.y, -self.eye.z)

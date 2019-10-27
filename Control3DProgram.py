@@ -71,9 +71,12 @@ class GraphicsProgram3D:
         self.angle += pi * delta_time
         # if angle > 2 * pi:
         #     angle -= (2 * pi)
+        eyebound = AABB([(self.view_matrix.eye.x - 0.2, self.view_matrix.eye.x + 0.2), (self.view_matrix.eye.y -
+                                                                                        0.2, self.view_matrix.eye.y + 0.2), (self.view_matrix.eye.z - 0.2, self.view_matrix.eye.z + 0.2)])
 
         if self.inputs["W"]:
-            self.view_matrix.slide(0, 0, -10 * delta_time)
+            if(!tree.does_overlap(eyebound)):
+                self.view_matrix.slide(0, 0, -10 * delta_time)
         if self.inputs["S"]:
             self.view_matrix.slide(0, 0, 10 * delta_time)
         if self.inputs["A"]:
@@ -92,9 +95,9 @@ class GraphicsProgram3D:
             self.view_matrix.yaw(-pi * delta_time)
         if self.inputs["RIGHT"]:
             self.view_matrix.yaw(pi * delta_time)
-        eyebound = (self.view_matrix.eye.x, self.view_matrix.eye.y,
-                    self.view_matrix.eye.z, 0.2)
-        if(self.tree.does_overlap(AABB([(eyebound[0] - eyebound[3], eyebound[0] + eyebound[3]), (eyebound[1] - eyebound[3], eyebound[1] + eyebound[3]), (eyebound[2] - eyebound[3], eyebound[2] + eyebound[3])]))):
+        eyebound = AABB([(self.view_matrix.eye.x - 0.2, self.view_matrix.eye.x + 0.2), (self.view_matrix.eye.y -
+                                                                                        0.2, self.view_matrix.eye.y + 0.2), (self.view_matrix.eye.z - 0.2, self.view_matrix.eye.z + 0.2)])
+        if(self.tree.does_overlap(eyebound)):
             print("hebbo")
 
     def display(self):
@@ -144,7 +147,6 @@ class GraphicsProgram3D:
     def program_loop(self):
         exiting = False
         while not exiting:
-
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     print("Quitting!")
