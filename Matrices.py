@@ -118,8 +118,6 @@ class ViewMatrix:
                           (self.view_matrix.eye.y - 0.2, self.view_matrix.eye.y + 0.2), 
                           (self.view_matrix.eye.z - 0.2, self.view_matrix.eye.z + 0.2)])
 
-    ## MAKE OPERATIONS TO ADD LOOK, SLIDE, PITCH, YAW and ROLL ##
-    # ---
     def look(self, eye, center, up):
         self.eye = eye
         self.n = (eye - center)
@@ -169,6 +167,17 @@ class ViewMatrix:
         newpos = Vector(delta * self.n.x, 0, delta * self.n.z)
         set_aabb(vector=newpos)
         return newpos
+        
+    def rotateY(self, angle):
+        """
+        rotates the camera yaw style regardless of the camera looking up/down
+        """
+        #radians = angle * (pi / 180)
+        c = cos(angle)
+        s = sin(angle)
+        self.u = Vector(c * self.u.x - s * self.u.z, self.u.y, s * self.u.x + c * self.u.z)
+        self.v = Vector(c * self.v.x - s * self.v.z, self.v.y, s * self.v.x + c * self.v.z)
+        self.n = Vector(c * self.n.x - s * self.n.z,self.n.y, s * self.n.x + c * self.n.z)
 
     def get_matrix(self):
         minusEye = Vector(-self.eye.x, -self.eye.y, -self.eye.z)
