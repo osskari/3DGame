@@ -1,6 +1,6 @@
 # Sensitivity for look up/down mouse movement
-SENSITIVITY = 0.1
+SENSITIVITY = 0.2
 # How many jump iterations pass
-VELOCITY = 16
+VELOCITY = 64
 # How much each jump iteration increases by
-MASS = 2
+MASS = 0.2

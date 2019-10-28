@@ -39,6 +39,8 @@ class GraphicsProgram3D:
 
         self.cube = Cube()
 
+        self.sphere = OptimizedSphere()
+
         self.clock = pygame.time.Clock()
         self.clock.tick()
 
@@ -210,6 +212,18 @@ class GraphicsProgram3D:
         self.shader.set_model_matrix(self.model_matrix.matrix)
         self.cube.draw()
         self.model_matrix.pop_matrix()
+
+        
+
+        self.sphere.set_vertices(self.shader)
+        self.shader.set_material_diffuse(0.0, 1.0, 0.0)
+        self.model_matrix.push_matrix()
+        self.model_matrix.add_translation(-5.0, -0.8, -5.0)
+        self.model_matrix.add_scale(10.0, 0.8, 10.0)
+        self.shader.set_model_matrix(self.model_matrix.matrix)
+        self.cube.draw()
+        self.model_matrix.pop_matrix()
+
 
         pygame.display.flip()
 
