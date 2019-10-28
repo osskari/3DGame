@@ -61,6 +61,7 @@ class Vector:
         self.x /= length
         self.y /= length
         self.z /= length
+        return self
 
     def dot(self, other):
         return self.x * other.x + self.y * other.y + self.z * other.z

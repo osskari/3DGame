@@ -126,20 +126,29 @@ class GraphicsProgram3D:
             if(not self.tree.point_collision(newpos, eyebound)):
                 self.view_matrix.eye = newpos
             else:
-                self.tree.get_colliding_face({"pos": self.view_matrix.eye, "scale": eyebound}, self.tree.collision_objects(newpos, eyebound)[0])
+                self.view_matrix.eye += self.tree.get_slide_vector({"pos": self.view_matrix.eye, "scale": eyebound, "direction": newpos - self.view_matrix.eye}, self.tree.collision_objects(newpos, eyebound)[0])
 
         if self.inputs["S"]:
             newpos = self.view_matrix.slide(0, 0, 10 * delta_time)
             if(not self.tree.point_collision(newpos, eyebound)):
                 self.view_matrix.eye = newpos
+            else:
+                self.view_matrix.eye += self.tree.get_slide_vector({"pos": self.view_matrix.eye, "scale": eyebound, "direction": newpos - self.view_matrix.eye}, self.tree.collision_objects(newpos, eyebound)[0])
+
         if self.inputs["A"]:
             newpos = self.view_matrix.slide(-10 * delta_time, 0, 0)
             if(not self.tree.point_collision(newpos, eyebound)):
                 self.view_matrix.eye = newpos
+            else:
+                self.view_matrix.eye += self.tree.get_slide_vector({"pos": self.view_matrix.eye, "scale": eyebound, "direction": newpos - self.view_matrix.eye}, self.tree.collision_objects(newpos, eyebound)[0])
+
         if self.inputs["D"]:
             newpos = self.view_matrix.slide(10 * delta_time, 0, 0)
             if(not self.tree.point_collision(newpos, eyebound)):
                 self.view_matrix.eye = newpos
+            else:
+                self.view_matrix.eye += self.tree.get_slide_vector({"pos": self.view_matrix.eye, "scale": eyebound, "direction": newpos - self.view_matrix.eye}, self.tree.collision_objects(newpos, eyebound)[0])
+
         if self.inputs["Q"]:
             self.view_matrix.roll(pi * delta_time)
         if self.inputs["E"]:
