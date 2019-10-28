@@ -1,5 +1,5 @@
 from aabbtree import AABB, AABBTree
-from Base3DObjects import Point
+from Base3DObjects import Point, Vector
 
 
 # Object that helps with collision detection using the AABBTree object
