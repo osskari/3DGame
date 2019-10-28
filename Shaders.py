@@ -89,9 +89,6 @@ class Shader3D:
         glVertexAttribPointer(self.normalLoc, 3, GL_FLOAT,
                               True, 0, normal_array)
 
-    # def set_solid_color(self, r, g, b):
-    #     glUniform4f(self.colorLoc, r, g, b, 1.0)
-
     def set_light_position(self, x, y, z):
         glUniform4f(self.lightPosLoc, x, y, z, 1.0)
 

@@ -13,6 +13,8 @@ from Matrices import *
 
 from SETTINGS import *
 
+from GameObjects.GameCube import GameCube
+from GameObjects.SandCube import SandCube
 
 class GraphicsProgram3D:
     def __init__(self):
@@ -33,8 +35,7 @@ class GraphicsProgram3D:
         self.view_matrix.look(Point(0, 3, 10), Point(0, 0, 0), Vector(0, 1, 0))
 
         self.projection_matrix = ProjectionMatrix()
-        # self.projection_matrix.set_orthographic(-2, 2, -2, 2, 0.5, 10)
-        self.projection_matrix.set_perspective(pi/2, 800/600, 0.5, 100)
+        self.projection_matrix.set_perspective(pi/2, 800/600, 0.02, 100)
         self.shader.set_projection_matrix(self.projection_matrix.get_matrix())
 
         self.cube = Cube()
@@ -76,6 +77,9 @@ class GraphicsProgram3D:
 
         self.white_background = False
 
+        self.hand_angle_x = -1
+        self.hand_angle_z = 0
+
     def load_texture(self, path):
         surface = pygame.image.load(path)
         tex_string = pygame.image.tostring(surface, "RGBA", 1)
@@ -93,7 +97,7 @@ class GraphicsProgram3D:
         Binds all textures to a number, texture can then be accessed
         via self.shader.set_diffuse_texture(n)
         """
-        
+
         glActiveTexture(GL_TEXTURE0)
         glBindTexture(GL_TEXTURE_2D, self.texture_id01_brick)
         glActiveTexture(GL_TEXTURE1)
@@ -107,13 +111,13 @@ class GraphicsProgram3D:
         self.jump(delta_time)
 
         if self.inputs["W"]:
-            self.view_matrix.slide(0, 0, -10 * delta_time)
+            self.view_matrix.slide(0, 0, -2 * delta_time)
         if self.inputs["S"]:
-            self.view_matrix.slide(0, 0, 10 * delta_time)
+            self.view_matrix.slide(0, 0, 2 * delta_time)
         if self.inputs["A"]:
-            self.view_matrix.slide(-10 * delta_time, 0, 0)
+            self.view_matrix.slide(-2 * delta_time, 0, 0)
         if self.inputs["D"]:
-            self.view_matrix.slide(10 * delta_time, 0, 0)
+            self.view_matrix.slide(2 * delta_time, 0, 0)
         if self.inputs["Q"]:
             self.view_matrix.roll(pi * delta_time)
         if self.inputs["E"]:
@@ -128,6 +132,8 @@ class GraphicsProgram3D:
             self.view_matrix.yaw(pi * delta_time)
 
         self.mouse_look_movement(delta_time)
+        self.mouse_angle_x  = 0
+        self.mouse_angle_y  = 0
 
     def mouse_look_movement(self, delta_time):
         """
@@ -142,6 +148,8 @@ class GraphicsProgram3D:
         # Change where the camera is looking based on how much mouse movement
         # there has been since last frame
         if self.mouse_move != (0, 0):
+            self.hand_angle_z  -= (self.mouse_move[0] * SENSITIVITY) * delta_time
+            self.hand_angle_x  -= (self.mouse_move[1] * SENSITIVITY) * delta_time
             if self.mouse_move[0] < 0:
                 self.view_matrix.rotateY((self.mouse_move[0] * SENSITIVITY) * delta_time)
             elif self.mouse_move[0] > 0:
@@ -170,7 +178,6 @@ class GraphicsProgram3D:
             p = (self.m * self.v)
 
             # Change position
-            #TODO má þetta?, fokkar þetta í eitthverju að breyta bara eye en ekki hinum vector(v,n,u etc)
             self.view_matrix.eye.y += p * delta_time
             # Change velocity
             self.v = self.v - 1
@@ -227,23 +234,28 @@ class GraphicsProgram3D:
 
         self.model_matrix.push_matrix()
         self.shader.set_material_diffuse(0.5, 0.5, 0.5)
-        self.model_matrix.add_translation(0.0, 0.0, 0.0)
-        self.model_matrix.add_scale(0.5, 0.5, 0.5)
+        self.model_matrix.add_translation(0, 0, 0)
+        self.model_matrix.add_scale(0.2, 0.2, 0.2)
         self.shader.set_model_matrix(self.model_matrix.matrix)
         self.cube.draw()
         self.model_matrix.pop_matrix()
 
         self.shader.set_diffuse_texture(1)
 
+        self.shader.set_using_texture(0.0)
+        # Player hand
+        '''
         self.model_matrix.push_matrix()
         self.shader.set_material_diffuse(1.0, 1.0, 1.0)
-        self.model_matrix.add_translation(0.0, 1.0, 0.0)
-        self.model_matrix.add_scale(0.5, 0.5, 0.5)
+        self.model_matrix.add_translation(self.view_matrix.eye.x + 0.0397, self.view_matrix.eye.y - 0.0622, self.view_matrix.eye.z - 0.0384)
+        self.model_matrix.add_x_rotation(self.hand_angle_x)
+        self.model_matrix.add_y_rotation(-0.4)
+        self.model_matrix.add_z_rotation(self.hand_angle_z)
+        self.model_matrix.add_scale(0.02, 0.1, 0.05)
         self.shader.set_model_matrix(self.model_matrix.matrix)
         self.cube.draw()
         self.model_matrix.pop_matrix()
-
-        self.shader.set_using_texture(0.0)
+        '''
 
         self.shader.set_material_diffuse(1.0, 1.0, 1.0)
         self.model_matrix.push_matrix()

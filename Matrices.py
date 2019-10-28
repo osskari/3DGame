@@ -181,8 +181,6 @@ class ProjectionMatrix:
 
         self.is_orthographic = True
 
-    ## MAKE OPERATION TO SET PERSPECTIVE PROJECTION (don't forget to set is_orthographic to False) ##
-    # ---
     def set_perspective(self, fovy, aspect, near, far):
         self.near = near
         self.far = far
@@ -226,65 +224,3 @@ class ProjectionMatrix:
                     0, C, D, 0,
                     0, 0, E, F,
                     0, 0, -1, 0]
-
-
-# The ProjectionViewMatrix returns a hardcoded matrix
-# that is just used to get something to send to the
-# shader before you properly implement the ViewMatrix
-# and ProjectionMatrix classes.
-# Feel free to throw it away afterwards!
-
-# class ProjectionViewMatrix:
-#     def __init__(self):
-#         pass
-#
-#     def get_matrix(self):
-#         return [0.45052942369783683, 0.0, -0.15017647456594563, 0.0,
-#                 -0.10435451285616304, 0.5217725642808152, -0.3130635385684891, 0.0,
-#                 -0.2953940042189954, -0.5907880084379908, -0.8861820126569863, 3.082884480118567,
-#                 -0.2672612419124244, -0.5345224838248488, -0.8017837257372732, 3.7416573867739413]
-
-# IDEAS FOR OPERATIONS AND TESTING:
-# if __name__ == "__main__":
-#     matrix = ModelMatrix()
-#     matrix.push_matrix()
-#     print(matrix)
-#     matrix.add_translation(3, 1, 2)
-#     matrix.push_matrix()
-#     print(matrix)
-#     matrix.add_scale(2, 3, 4)
-#     print(matrix)
-#     matrix.pop_matrix()
-#     print(matrix)
-
-#     matrix.add_translation(5, 5, 5)
-#     matrix.push_matrix()
-#     print(matrix)
-#     matrix.add_scale(3, 2, 3)
-#     print(matrix)
-#     matrix.pop_matrix()
-#     print(matrix)
-
-#     matrix.pop_matrix()
-#     print(matrix)
-
-#     matrix.push_matrix()
-#     matrix.add_scale(2, 2, 2)
-#     print(matrix)
-#     matrix.push_matrix()
-#     matrix.add_translation(3, 3, 3)
-#     print(matrix)
-#     matrix.push_matrix()
-#     matrix.add_rotation_y(pi / 3)
-#     print(matrix)
-#     matrix.push_matrix()
-#     matrix.add_translation(1, 1, 1)
-#     print(matrix)
-#     matrix.pop_matrix()
-#     print(matrix)
-#     matrix.pop_matrix()
-#     print(matrix)
-#     matrix.pop_matrix()
-#     print(matrix)
-#     matrix.pop_matrix()
-#     print(matrix)
