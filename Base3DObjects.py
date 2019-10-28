@@ -42,7 +42,7 @@ class Point:
     def __repr__(self):
         return "Point(x: " + str(self.x) + ", y: " + str(self.y) + ", z: " + str(self.z) + ")"
 
-    def __eq__(self):
+    def __eq__(self, other):
         return Point(self.x, self.y, self.z)
 
 
@@ -76,6 +76,12 @@ class Vector:
     def cross(self, other):
         return Vector(self.y * other.z - self.z * other.y, self.z * other.x - self.x * other.z,
                       self.x * other.y - self.y * other.x)
+
+    def __str__(self):
+        return "Vector(x: " + str(self.x) + ", y: " + str(self.y) + ", z: " + str(self.z) + ")"
+
+    def __repr__(self):
+        return "Vector(x: " + str(self.x) + ", y: " + str(self.y) + ", z: " + str(self.z) + ")"
 
 
 class Cube:
@@ -128,6 +134,7 @@ class Cube:
                              1.0, 0.0, 0.0,
                              1.0, 0.0, 0.0,
                              1.0, 0.0, 0.0]
+
         self.uv_array = [0.0, 0.0,
                          0.0, 1.0,
                          1.0, 1.0,

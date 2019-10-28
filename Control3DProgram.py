@@ -74,6 +74,7 @@ class GraphicsProgram3D:
         self.tree = Collision()
         self.tree.add_object(Point(9.0, 5.0, -2.0), (2.0, 2.0, 2.0))
         self.tree.add_object(Point(-5.0, -0.8, -5.0), (10.0, 0.8, 10.0))
+        self.tree.add_object(Point(9, 5.0, -3.3), (1.0, 7.0, 1.0))
 
         self.cube1 = (Point(9.0, 5.0, -2.0), (2.0, 2.0, 2.0),
                       (1.0, 0.5, 0.0), (1.0, 1.0, 1.0), 13)
@@ -152,18 +153,27 @@ class GraphicsProgram3D:
 
         self.jump(delta_time)
 
+        eyebound = (0.2, 0.2, 0.2)
+
         if self.inputs["W"]:
             newpos = self.view_matrix.slide(0, 0, -10 * delta_time)
-            if(not self.tree.point_collision(newpos, (0.2, 0, 2, 0, 2))):
+            if(not self.tree.point_collision(newpos, eyebound)):
                 self.view_matrix.eye = newpos
             else:
-                print(self.tree.collision_objects(newpos, (0.2, 0, 2, 0, 2)))
+                self.tree.get_colliding_face({"pos": self.view_matrix.eye, "scale": eyebound}, self.tree.collision_objects(newpos, eyebound)[0])
+
         if self.inputs["S"]:
-            self.view_matrix.slide(0, 0, 10 * delta_time)
+            newpos = self.view_matrix.slide(0, 0, 10 * delta_time)
+            if(not self.tree.point_collision(newpos, eyebound)):
+                self.view_matrix.eye = newpos
         if self.inputs["A"]:
-            self.view_matrix.slide(-10 * delta_time, 0, 0)
+            newpos = self.view_matrix.slide(-10 * delta_time, 0, 0)
+            if(not self.tree.point_collision(newpos, eyebound)):
+                self.view_matrix.eye = newpos
         if self.inputs["D"]:
-            self.view_matrix.slide(10 * delta_time, 0, 0)
+            newpos = self.view_matrix.slide(10 * delta_time, 0, 0)
+            if(not self.tree.point_collision(newpos, eyebound)):
+                self.view_matrix.eye = newpos
         if self.inputs["Q"]:
             self.view_matrix.roll(pi * delta_time)
         if self.inputs["E"]:
@@ -281,6 +291,14 @@ class GraphicsProgram3D:
         self.model_matrix.add_scale(2.0, 2.0, 2.0)
         self.shader.set_model_matrix(self.model_matrix.matrix)
         self.cube.draw(self.shader)
+        self.model_matrix.pop_matrix()
+
+        self.shader.set_material_diffuse(1.0, 0.5, 0.0)
+        self.model_matrix.push_matrix()
+        self.model_matrix.add_translation(9, 5.0, -3.3)
+        self.model_matrix.add_scale(1.0, 7.0, 1.0)
+        self.shader.set_model_matrix(self.model_matrix.matrix)
+        self.cube.draw()
         self.model_matrix.pop_matrix()
 
         # Small cube
