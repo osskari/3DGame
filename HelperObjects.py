@@ -16,7 +16,8 @@ class Collision:
     # Add object with position and scale to the tree
     # Sets the position as the value returned in case of collision
     def add_object(self, position, scale):
-        self.tree.add(self.get_aabb(position, scale), position)
+        self.tree.add(self.get_aabb(position, scale),
+                      {"pos": position, "scale": scale})
 
     # Makes checking for collision on point easier
     def point_collision(self, point, bound):
@@ -25,3 +26,28 @@ class Collision:
     # Returns the point object of collided objects
     def collision_objects(self, point, bound):
         return self.tree.overlap_values(self.get_aabb(point, bound))
+
+    def is_between(self, player, object, axis):
+        num = (0 if axis == "x" else 1 if axis == "y" else 2)
+        return object["pos"][num] - object["scale"][num] - player["scale"][num] < player["pos"][num] < object["pos"][num] + object["scale"][num] + player["scale"][num]
+
+    def get_colliding_face(self, player, obj):
+        if (self.is_between(player, obj, "x")) and (self.is_between(player, obj, "z")):
+            if obj["pos"].y < player["pos"].y:
+                print("top")
+                return Vector()
+            else:
+                print("bottom")
+
+        if (self.is_between(player, obj, "x")) and (self.is_between(player, obj, "y")):
+            if obj["pos"].z < player["pos"].z:
+                print("north")
+            else:
+                print("south")
+
+        if (self.is_between(player, obj, "y")) and (self.is_between(player, obj, "z")):
+            if obj["pos"].x < player["pos"].x:
+                print("east")
+            else:
+                print("west")
+
