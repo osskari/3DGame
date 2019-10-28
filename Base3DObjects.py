@@ -7,6 +7,8 @@ from OpenGL.GLU import *
 import math
 from math import *
 
+import numpy
+
 
 class Point:
     def __init__(self, x, y, z):
@@ -90,6 +92,7 @@ class Cube:
                                0.5, -0.5, 0.5,
                                0.5, 0.5, 0.5,
                                0.5, 0.5, -0.5]
+
         self.normal_array = [0.0, 0.0, -1.0,
                              0.0, 0.0, -1.0,
                              0.0, 0.0, -1.0,
@@ -115,9 +118,35 @@ class Cube:
                              1.0, 0.0, 0.0,
                              1.0, 0.0, 0.0]
 
+        self.uv_array =     [0.0, 0.0,
+                             0.0, 1.0,
+                             1.0, 1.0,
+                             1.0, 0.0,
+                             0.0, 0.0,
+                             0.0, 1.0,
+                             1.0, 1.0,
+                             1.0, 0.0,
+                             0.0, 0.0,
+                             0.0, 1.0,
+                             1.0, 1.0,
+                             1.0, 0.0,
+                             0.0, 0.0,
+                             0.0, 1.0,
+                             1.0, 1.0,
+                             1.0, 0.0,
+                             0.0, 0.0,
+                             0.0, 1.0,
+                             1.0, 1.0,
+                             1.0, 0.0,
+                             0.0, 0.0,
+                             0.0, 1.0,
+                             1.0, 1.0,
+                             1.0, 0.0]
+
     def set_vertices(self, shader):
         shader.set_position_attribute(self.position_array)
         shader.set_normal_attribute(self.normal_array)
+        shader.set_uv_attribute(self.uv_array)
 
     def draw(self):
         glDrawArrays(GL_TRIANGLE_FAN, 0, 4)

@@ -20,6 +20,7 @@ uniform sampler2D u_tex01;
 uniform sampler2D u_tex02;
 
 uniform float u_using_texture;
+uniform float u_using_specular_texture;
 
 uniform float u_mat_shininess;
 
@@ -30,8 +31,10 @@ void main(void)
 
 	//Muna gera annað if/breytu til að geta notað texture sem specular
 	if(u_using_texture == 1.0){
-    	mat_diffuse = u_mat_diffuse * texture2D(u_tex01, v_uv);
-    	//mat_specular = u_mat_specular * texture2D(u_tex02, v_uv);
+    	mat_diffuse *= texture2D(u_tex01, v_uv);
+	}
+	if(u_using_specular_texture == 1.0) {
+		mat_specular *= texture2D(u_tex02, v_uv);
 	}
 
 	float s_len = length(v_s);
