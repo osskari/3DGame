@@ -8,10 +8,13 @@ from pygame.locals import *
 import sys
 import time
 
+from aabbtree import AABB, AABBTree
+
 from Shaders import *
 from Matrices import *
 
 from SETTINGS import *
+from HelperObjects import *
 
 
 class GraphicsProgram3D:
@@ -33,7 +36,6 @@ class GraphicsProgram3D:
         self.view_matrix.look(Point(0, 3, 10), Point(0, 0, 0), Vector(0, 1, 0))
 
         self.projection_matrix = ProjectionMatrix()
-        # self.projection_matrix.set_orthographic(-2, 2, -2, 2, 0.5, 10)
         self.projection_matrix.set_perspective(pi/2, 800/600, 0.5, 100)
         self.shader.set_projection_matrix(self.projection_matrix.get_matrix())
 
@@ -45,6 +47,26 @@ class GraphicsProgram3D:
         self.clock.tick()
 
         self.angle = 0
+
+        self.bmotion = BazierMotion(
+            Point(1.0, 1.0, 1.0),
+            Point(2.0, 2.0, 2.0),
+            Point(4.0, 4.0, 4.0),
+            Point(1.0, 5.0, 5.0),
+            5,
+            10
+        )
+
+        self.bmotion.get_current_position(7)
+
+        self.tree = Collision()
+        self.tree.add_object(Point(9.0, 5.0, -2.0), (2.0, 2.0, 2.0))
+        self.tree.add_object(Point(-5.0, -0.8, -5.0), (10.0, 0.8, 10.0))
+
+        self.cube1 = (Point(9.0, 5.0, -2.0), (2.0, 2.0, 2.0),
+                      (1.0, 0.5, 0.0), (1.0, 1.0, 1.0), 13)
+        self.cube2 = (Point(-5.0, -0.8, -5.0), (10.0, 0.8, 10.0),
+                      (0.0, 1.0, 0.0), (1.0, 1.0, 1.0), 13)
 
         self.inputs = {
             "W": False,
@@ -71,12 +93,10 @@ class GraphicsProgram3D:
         # Mass
         self.m = MASS
 
-        #Initialize variable that tracks how much mouse movement there is each frame
+        # Initialize variable that tracks how much mouse movement there is each frame
         self.mouse_move = (0, 0)
-        #bool to ignore first mouse movement
+        # bool to ignore first mouse movement
         self.first_move = True
-
-
 
         self.white_background = False
 
@@ -89,7 +109,8 @@ class GraphicsProgram3D:
         glBindTexture(GL_TEXTURE_2D, tex_id)
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, tex_width, tex_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, tex_string)
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, tex_width,
+                     tex_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, tex_string)
         return tex_id
 
     def bind_textures(self):
@@ -97,7 +118,7 @@ class GraphicsProgram3D:
         Binds all textures to a number, texture can then be accessed
         via self.shader.set_diffuse_texture(n)
         """
-        
+
         glActiveTexture(GL_TEXTURE0)
         glBindTexture(GL_TEXTURE_2D, self.texture_id01_brick)
         glActiveTexture(GL_TEXTURE1)
@@ -115,7 +136,11 @@ class GraphicsProgram3D:
         self.jump(delta_time)
 
         if self.inputs["W"]:
-            self.view_matrix.slide(0, 0, -10 * delta_time)
+            newpos = self.view_matrix.slide(0, 0, -10 * delta_time)
+            if(not self.tree.point_collision(newpos, (0.2, 0, 2, 0, 2))):
+                self.view_matrix.eye = newpos
+            else:
+                print(self.tree.collision_objects(newpos, (0.2, 0, 2, 0, 2)))
         if self.inputs["S"]:
             self.view_matrix.slide(0, 0, 10 * delta_time)
         if self.inputs["A"]:
@@ -143,25 +168,29 @@ class GraphicsProgram3D:
         param delta_time: Elapsed time since last frame
         """
 
-        #TODO SENSITIVITY constant er 0.1, revisit til að finna rétta sensið
-        #TODO rotateY og pitch virka ekki eins, hugsanlega hafa sitthvoran constant
+        # TODO SENSITIVITY constant er 0.1, revisit til að finna rétta sensið
+        # TODO rotateY og pitch virka ekki eins, hugsanlega hafa sitthvoran constant
         # ef að það er mikill munur á mouse movement upp/niður vs vinstri/hægri
 
         # Change where the camera is looking based on how much mouse movement
         # there has been since last frame
         if self.mouse_move != (0, 0):
             if self.mouse_move[0] < 0:
-                self.view_matrix.rotateY((self.mouse_move[0] * SENSITIVITY) * delta_time)
+                self.view_matrix.rotateY(
+                    (self.mouse_move[0] * SENSITIVITY) * delta_time)
             elif self.mouse_move[0] > 0:
-                self.view_matrix.rotateY((self.mouse_move[0] * SENSITIVITY) * delta_time)
+                self.view_matrix.rotateY(
+                    (self.mouse_move[0] * SENSITIVITY) * delta_time)
             if self.mouse_move[1] < 0:
                 # Make sure the player can not look further than straight up
                 if self.view_matrix.n.y > -0.99:
-                    self.view_matrix.pitch((self.mouse_move[1] * SENSITIVITY) * delta_time)
+                    self.view_matrix.pitch(
+                        (self.mouse_move[1] * SENSITIVITY) * delta_time)
             elif self.mouse_move[1] > 0:
                 # Make sure the player can not look further than straight down
                 if self.view_matrix.n.y < 0.99:
-                    self.view_matrix.pitch((self.mouse_move[1] * SENSITIVITY) * delta_time)
+                    self.view_matrix.pitch(
+                        (self.mouse_move[1] * SENSITIVITY) * delta_time)
         # Reset to avoid camera pan
         self.mouse_move = (0, 0)
 
@@ -178,21 +207,21 @@ class GraphicsProgram3D:
             p = (self.m * self.v)
 
             # Change position
-            #TODO má þetta?, fokkar þetta í eitthverju að breyta bara eye en ekki hinum vector(v,n,u etc)
+            # TODO má þetta?, fokkar þetta í eitthverju að breyta bara eye en ekki hinum vector(v,n,u etc)
             self.view_matrix.eye.y += p * delta_time
             # Change velocity
             self.v = self.v - 1
 
             # Hugsanlega skoða það að breyta hvernig annað movement virkar
             # A meðan player er að hoppa?
-            #TODO hafa annað condition fyrir til að stoppa jump ef player
-            #collide-ar við eitthvað fyrir neðan sig???
+            # TODO hafa annað condition fyrir til að stoppa jump ef player
+            # collide-ar við eitthvað fyrir neðan sig???
 
             # Stop the jump when it reaches the bottom of the 'curve'
             if self.v == -VELOCITY - 1:
                 self.inputs["JUMP"] = False
                 self.v = VELOCITY
-  
+
     def display(self):
         glEnable(GL_DEPTH_TEST)
 
@@ -227,7 +256,7 @@ class GraphicsProgram3D:
         ################ DRAW #################
         self.cube.set_vertices(self.shader)
 
-        self.shader.set_material_diffuse(1.0, 0.0, 0.0)
+        self.shader.set_material_diffuse(1.0, 0.5, 0.0)
         self.model_matrix.push_matrix()
         self.model_matrix.add_translation(9.0, 5.0, -2.0)
         self.model_matrix.add_scale(2.0, 2.0, 2.0)
@@ -238,7 +267,7 @@ class GraphicsProgram3D:
         # Small cube
         self.shader.set_using_texture(1.0)
 
-        self.shader.set_diffuse_texture(0) 
+        self.shader.set_diffuse_texture(0)
 
         self.model_matrix.push_matrix()
         self.shader.set_material_diffuse(0.5, 0.5, 0.5)

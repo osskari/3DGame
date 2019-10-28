@@ -22,6 +22,9 @@ class Point:
     def __sub__(self, other):
         return Vector(self.x - other.x, self.y - other.y, self.z - other.z)
 
+    def __mul__ (self, other):
+        return Point(self.x * other, self.y * other, self.z * other)
+
     def __iter__(self):
         return (self.__getitem__(x) for x in range(3))
 
@@ -32,6 +35,15 @@ class Point:
             return self.y
         elif item == 2 or item == "Z":
             return self.z
+
+    def __str__(self):
+        return "Point(x: " + str(self.x) + ", y: " + str(self.y) + ", z: " + str(self.z) + ")"
+
+    def __repr__(self):
+        return "Point(x: " + str(self.x) + ", y: " + str(self.y) + ", z: " + str(self.z) + ")"
+
+    def __eq__(self):
+        return Point(self.x, self.y, self.z)
 
 
 class Vector:
