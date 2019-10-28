@@ -38,13 +38,12 @@ class GraphicsProgram3D:
         self.view_matrix.look(Point(0, 3, 10), Point(0, 0, 0), Vector(0, 1, 0))
 
         self.projection_matrix = ProjectionMatrix()
-        self.projection_matrix.set_perspective(pi/2, 800/600, 0.5, 100)
+        self.projection_matrix.set_perspective(pi / 2, 800 / 600, 0.5, 100)
         self.shader.set_projection_matrix(self.projection_matrix.get_matrix())
 
         self.cube = OptimizedCube()
 
         self.sphere = OptimizedSphere()
-
 
         ## Timer for bazier curves
         self.timer = 0
@@ -54,8 +53,8 @@ class GraphicsProgram3D:
         self.angle = 0
 
         self.sunMotion = BezierMotion(
-            5,
-            10,
+            0,
+            15,
             Point(-15.0, 0.0, 0.0),
             Point(-15.0, 15.0, 0.0),
             Point(15.0, 15.0, 0.0),
@@ -64,7 +63,7 @@ class GraphicsProgram3D:
 
         self.moonMotion = BezierMotion(
             15,
-            20,
+            30,
             Point(-15.0, 0.0, 0.0),
             Point(-15.0, 15.0, 0.0),
             Point(15.0, 15.0, 0.0),
@@ -101,10 +100,8 @@ class GraphicsProgram3D:
         self.texture_moon = self.load_texture(sys.path[0] + "/textures/2k_moon.jpg")
         self.bind_textures()
 
-
-        self.sun = CircularObject(self.texture_sun, self.sunMotion.get_current_position(0))
-        self.moon = CircularObject(self.texture_moon, self.moonMotion.get_current_position(0))
-
+        self.sun = CircularObject(self.texture_sun, self.sunMotion.get_current_position(0), self.sunMotion)
+        self.moon = CircularObject(self.texture_moon, self.moonMotion.get_current_position(0), self.moonMotion)
 
         # Velocity
         self.v = VELOCITY
@@ -157,22 +154,23 @@ class GraphicsProgram3D:
 
         if self.inputs["W"]:
             newpos = self.view_matrix.slide(0, 0, -10 * delta_time)
-            if(not self.tree.point_collision(newpos, eyebound)):
+            if (not self.tree.point_collision(newpos, eyebound)):
                 self.view_matrix.eye = newpos
             else:
-                self.tree.get_colliding_face({"pos": self.view_matrix.eye, "scale": eyebound}, self.tree.collision_objects(newpos, eyebound)[0])
+                self.tree.get_colliding_face({"pos": self.view_matrix.eye, "scale": eyebound},
+                                             self.tree.collision_objects(newpos, eyebound)[0])
 
         if self.inputs["S"]:
             newpos = self.view_matrix.slide(0, 0, 10 * delta_time)
-            if(not self.tree.point_collision(newpos, eyebound)):
+            if (not self.tree.point_collision(newpos, eyebound)):
                 self.view_matrix.eye = newpos
         if self.inputs["A"]:
             newpos = self.view_matrix.slide(-10 * delta_time, 0, 0)
-            if(not self.tree.point_collision(newpos, eyebound)):
+            if (not self.tree.point_collision(newpos, eyebound)):
                 self.view_matrix.eye = newpos
         if self.inputs["D"]:
             newpos = self.view_matrix.slide(10 * delta_time, 0, 0)
-            if(not self.tree.point_collision(newpos, eyebound)):
+            if (not self.tree.point_collision(newpos, eyebound)):
                 self.view_matrix.eye = newpos
         if self.inputs["Q"]:
             self.view_matrix.roll(pi * delta_time)
@@ -187,8 +185,11 @@ class GraphicsProgram3D:
         if self.inputs["RIGHT"]:
             self.view_matrix.yaw(pi * delta_time)
 
-        self.sun.position = self.sunMotion.get_current_position(self.timer)
-        self.moon.position = self.moonMotion.get_current_position(self.timer)
+
+        if self.sun.bezier_done(self.timer):
+            self.sun.restart_motion(self.moon.bezier_motion.end_time)
+        if self.moon.bezier_done(self.timer):
+            self.moon.restart_motion(self.sun.bezier_motion.end_time)
 
         self.mouse_look_movement(delta_time)
 
@@ -281,8 +282,6 @@ class GraphicsProgram3D:
         self.shader.set_using_texture(0.0)
         self.shader.set_using_specular_texture(0.0)
 
-
-
         ################ DRAW #################
 
         self.shader.set_material_diffuse(1.0, 0.5, 0.0)
@@ -340,7 +339,7 @@ class GraphicsProgram3D:
         self.shader.set_diffuse_texture(self.sun.texture)
         self.shader.set_material_diffuse(*self.sun.diffuse)
         self.model_matrix.push_matrix()
-        self.model_matrix.add_translation(*self.sun.position)
+        self.model_matrix.add_translation(*self.sun.get_position(self.timer))
         self.model_matrix.add_scale(5.0, 5.0, 5.0)
         self.shader.set_model_matrix(self.model_matrix.matrix)
         self.sphere.draw(self.shader)
@@ -349,12 +348,12 @@ class GraphicsProgram3D:
         self.shader.set_diffuse_texture(self.moon.texture)
         self.shader.set_material_diffuse(*self.moon.diffuse)
         self.model_matrix.push_matrix()
-        self.model_matrix.add_translation(*self.moon.position)
+        self.model_matrix.add_translation(*self.moon.get_position(self.timer))
         self.model_matrix.add_scale(5.0, 5.0, 5.0)
         self.shader.set_model_matrix(self.model_matrix.matrix)
         self.sphere.draw(self.shader)
         self.model_matrix.pop_matrix()
-        
+
 
         pygame.display.flip()
 
