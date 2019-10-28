@@ -33,13 +33,14 @@ class Shader3D:
         glAttachShader(self.renderingProgramID, frag_shader)
         glLinkProgram(self.renderingProgramID)
 
-        self.positionLoc = glGetAttribLocation(
-            self.renderingProgramID, "a_position")
+        self.positionLoc = glGetAttribLocation(self.renderingProgramID, "a_position")
         glEnableVertexAttribArray(self.positionLoc)
 
-        self.normalLoc = glGetAttribLocation(
-            self.renderingProgramID, "a_normal")
+        self.normalLoc = glGetAttribLocation(self.renderingProgramID, "a_normal")
         glEnableVertexAttribArray(self.normalLoc)
+
+        self.uvLoc = glGetAttribLocation(self.renderingProgramID, "a_uv")
+        glEnableVertexAttribArray(self.uvLoc)
 
         # self.colorLoc = glGetUniformLocation(self.renderingProgramID, "u_color")
         self.eyePosLoc = glGetUniformLocation(self.renderingProgramID, "u_eye_position")
@@ -120,6 +121,15 @@ class Shader3D:
         glVertexAttribPointer(self.positionLoc, 3, GL_FLOAT, False, 8 * sizeof(GLfloat), OpenGL.GLU.ctypes.c_void_p(0))
         glVertexAttribPointer(self.normalLoc, 3, GL_FLOAT, False, 8 * sizeof(GLfloat), OpenGL.GLU.ctypes.c_void_p(3 * sizeof(GLfloat)))
         glVertexAttribPointer(self.uvLoc, 2, GL_FLOAT, False, 8 * sizeof(GLfloat), OpenGL.GLU.ctypes.c_void_p(6 * sizeof(GLfloat)))
+
+    def set_uv_attribute(self, vertex_array):
+        glVertexAttribPointer(self.uvLoc, 2, GL_FLOAT, False, 0, vertex_array)
+
+    def set_using_texture(self, n):
+        glUniform1f(self.usingTextureLoc, n)
+
+    def set_diffuse_texture(self, n):
+        glUniform1i(self.diffuseTextureLoc, n)
 
     def set_uv_attribute(self, vertex_array):
         glVertexAttribPointer(self.uvLoc, 2, GL_FLOAT, False, 0, vertex_array)
