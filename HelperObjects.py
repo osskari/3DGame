@@ -26,22 +26,21 @@ class Collision:
         return self.tree.overlap_values(self.get_aabb(point, bound))
 
 class BazierMotion:
-    def __init__(self, p1, p2, p3, p4, start_time, end_time):
-        self.p1 = p1
-        self.p2 = p2
-        self.p3 = p3
-        self.p4 = p4
+    def __init__(self, start_time, end_time, *bazier_points):
+        self.points = []
+        for point in bazier_points:
+            self.points.append(point)
         self.start_time = start_time
         self.end_time = end_time
 
     def get_current_position(self, time):
         t = (time - self.start_time) / (self.end_time - self.start_time)
         if(time < self.start_time):
-            return p1
+            return self.points[0]
         elif (time > self.end_time):
-            return p4
+            return self.points[len(self.points) - 1]
         else:
-            return self._rec_pos(t, [self.p1,self.p2,self.p3,self.p4])
+            return self._rec_pos(t, self.points)
             
     def _rec_pos(self, t, point_list):
         if(len(point_list) == 1):

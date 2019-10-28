@@ -49,15 +49,15 @@ class GraphicsProgram3D:
         self.angle = 0
 
         self.bmotion = BazierMotion(
+            5,
+            10,
             Point(1.0, 1.0, 1.0),
             Point(2.0, 2.0, 2.0),
             Point(4.0, 4.0, 4.0),
-            Point(1.0, 5.0, 5.0),
-            5,
-            10
+            Point(1.0, 5.0, 5.0)
         )
 
-        self.bmotion.get_current_position(7)
+        print(self.bmotion.get_current_position(7))
 
         self.tree = Collision()
         self.tree.add_object(Point(9.0, 5.0, -2.0), (2.0, 2.0, 2.0))
