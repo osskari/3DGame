@@ -22,7 +22,7 @@ class Point:
     def __sub__(self, other):
         return Vector(self.x - other.x, self.y - other.y, self.z - other.z)
 
-    def __mul__ (self, other):
+    def __mul__(self, other):
         return Point(self.x * other, self.y * other, self.z * other)
 
     def __iter__(self):
@@ -104,7 +104,6 @@ class Cube:
                                0.5, -0.5, 0.5,
                                0.5, 0.5, 0.5,
                                0.5, 0.5, -0.5]
-
         self.normal_array = [0.0, 0.0, -1.0,
                              0.0, 0.0, -1.0,
                              0.0, 0.0, -1.0,
@@ -129,31 +128,30 @@ class Cube:
                              1.0, 0.0, 0.0,
                              1.0, 0.0, 0.0,
                              1.0, 0.0, 0.0]
-
-        self.uv_array =     [0.0, 0.0,
-                             0.0, 1.0,
-                             1.0, 1.0,
-                             1.0, 0.0,
-                             0.0, 0.0,
-                             0.0, 1.0,
-                             1.0, 1.0,
-                             1.0, 0.0,
-                             0.0, 0.0,
-                             0.0, 1.0,
-                             1.0, 1.0,
-                             1.0, 0.0,
-                             0.0, 0.0,
-                             0.0, 1.0,
-                             1.0, 1.0,
-                             1.0, 0.0,
-                             0.0, 0.0,
-                             0.0, 1.0,
-                             1.0, 1.0,
-                             1.0, 0.0,
-                             0.0, 0.0,
-                             0.0, 1.0,
-                             1.0, 1.0,
-                             1.0, 0.0]
+        self.uv_array = [0.0, 0.0,
+                         0.0, 1.0,
+                         1.0, 1.0,
+                         1.0, 0.0,
+                         0.0, 0.0,
+                         0.0, 1.0,
+                         1.0, 1.0,
+                         1.0, 0.0,
+                         0.0, 0.0,
+                         0.0, 1.0,
+                         1.0, 1.0,
+                         1.0, 0.0,
+                         0.0, 0.0,
+                         0.0, 1.0,
+                         1.0, 1.0,
+                         1.0, 0.0,
+                         0.0, 0.0,
+                         0.0, 1.0,
+                         1.0, 1.0,
+                         1.0, 0.0,
+                         0.0, 0.0,
+                         0.0, 1.0,
+                         1.0, 1.0,
+                         1.0, 0.0]
 
     def set_vertices(self, shader):
         shader.set_position_attribute(self.position_array)
@@ -169,13 +167,105 @@ class Cube:
         glDrawArrays(GL_TRIANGLE_FAN, 20, 4)
 
 
+class OptimizedCube:
+    def __init__(self):
+        vertex_array = [
+            -0.5, -0.5, -0.5,
+            0.0, 0.0, -1.0,
+            0.0, 0.0,
+            -0.5, 0.5, -0.5,
+            0.0, 0.0, -1.0,
+            0.0, 1.0,
+            0.5, 0.5, -0.5,
+            0.0, 0.0, -1.0,
+            1.0, 1.0,
+            0.5, -0.5, -0.5,
+            0.0, 0.0, -1.0,
+            1.0, 0.0,
+            -0.5, -0.5, 0.5,
+            0.0, 0.0, 1.0,
+            0.0, 0.0,
+            -0.5, 0.5, 0.5,
+            0.0, 0.0, 1.0,
+            0.0, 1.0,
+            0.5, 0.5, 0.5,
+            0.0, 0.0, 1.0,
+            1.0, 1.0,
+            0.5, -0.5, 0.5,
+            0.0, 0.0, 1.0,
+            1.0, 0.0,
+            -0.5, -0.5, -0.5,
+            0.0, -1.0, 0.0,
+            0.0, 0.0,
+            0.5, -0.5, -0.5,
+            0.0, -1.0, 0.0,
+            0.0, 1.0,
+            0.5, -0.5, 0.5,
+            0.0, -1.0, 0.0,
+            1.0, 1.0,
+            -0.5, -0.5, 0.5,
+            0.0, -1.0, 0.0,
+            1.0, 0.0,
+            -0.5, 0.5, -0.5,
+            0.0, 1.0, 0.0,
+            0.0, 0.0,
+            0.5, 0.5, -0.5,
+            0.0, 1.0, 0.0,
+            0.0, 1.0,
+            0.5, 0.5, 0.5,
+            0.0, 1.0, 0.0,
+            1.0, 1.0,
+            -0.5, 0.5, 0.5,
+            0.0, 1.0, 0.0,
+            1.0, 0.0,
+            -0.5, -0.5, -0.5,
+            -1.0, 0.0, 0.0,
+            0.0, 0.0,
+            -0.5, -0.5, 0.5,
+            -1.0, 0.0, 0.0,
+            0.0, 1.0,
+            -0.5, 0.5, 0.5,
+            -1.0, 0.0, 0.0,
+            1.0, 1.0,
+            -0.5, 0.5, -0.5,
+            -1.0, 0.0, 0.0,
+            1.0, 0.0,
+            0.5, -0.5, -0.5,
+            1.0, 0.0, 0.0,
+            0.0, 0.0,
+            0.5, -0.5, 0.5,
+            1.0, 0.0, 0.0,
+            0.0, 1.0,
+            0.5, 0.5, 0.5,
+            1.0, 0.0, 0.0,
+            1.0, 1.0,
+            0.5, 0.5, -0.5,
+            1.0, 0.0, 0.0,
+            1.0, 0.0
+        ]
+        self.vertex_buffer_id = glGenBuffers(1)
+        glBindBuffer(GL_ARRAY_BUFFER, self.vertex_buffer_id)
+        glBufferData(GL_ARRAY_BUFFER, numpy.array(vertex_array, dtype="float32"), GL_STATIC_DRAW)
+        glBindBuffer(GL_ARRAY_BUFFER, 0)
+
+    def draw(self, shader):
+        shader.set_attribute_buffers_with_uv(self.vertex_buffer_id)
+        glDrawArrays(GL_TRIANGLE_FAN, 0, 4)
+        glDrawArrays(GL_TRIANGLE_FAN, 4, 4)
+        glDrawArrays(GL_TRIANGLE_FAN, 8, 4)
+        glDrawArrays(GL_TRIANGLE_FAN, 12, 4)
+        glDrawArrays(GL_TRIANGLE_FAN, 16, 4)
+        glDrawArrays(GL_TRIANGLE_FAN, 20, 4)
+        glBindBuffer(GL_ARRAY_BUFFER, 0)
+
+
 class Sphere:
     def __init__(self, stacks=12, slices=24):
         self.vertex_array = []
         self.slices = slices
 
-        stack_interval = pi/stacks
-        slice_interval = 2.0*pi/slices
+        stack_interval = pi / stacks
+        slice_interval = 2.0 * pi / slices
         self.vertex_count = 0
 
         for stack_count in range(stacks):

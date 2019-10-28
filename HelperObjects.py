@@ -52,6 +52,10 @@ class BazierMotion:
             )
         return self._rec_pos(t, templist)
 
+    def restart(self, now, time):
+        self.start_time = now
+        self.end_time = now + time
+
 
 
         

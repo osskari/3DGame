@@ -1,4 +1,5 @@
 from OpenGL.GL import *
+import OpenGL.GLU
 from math import *  # trigonometry
 
 import sys
@@ -118,6 +119,7 @@ class Shader3D:
 
     def set_material_shininess(self, shininess):
         glUniform1f(self.materialShininessLoc, shininess)
+
 
     def set_attribute_buffers_with_uv(self, vertex_buffer_id):
         glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer_id)
