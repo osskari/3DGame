@@ -37,7 +37,7 @@ class Collision:
         if (self.is_between(player, obj, "x")) and (self.is_between(player, obj, "z")):
             if obj["pos"].y < player["pos"].y:
                 print("top")
-                return Vector()
+                return Vector(0.0, 0.0, 0.0)
             else:
                 print("bottom")
 

@@ -53,7 +53,7 @@ class GraphicsProgram3D:
 
         self.angle = 0
 
-        self.sunMotion = BazierMotion(
+        self.sunMotion = BezierMotion(
             5,
             10,
             Point(-15.0, 0.0, 0.0),
@@ -62,7 +62,7 @@ class GraphicsProgram3D:
             Point(15.0, 0.0, 0.0)
         )
 
-        self.moonMotion = BazierMotion(
+        self.moonMotion = BezierMotion(
             15,
             20,
             Point(-15.0, 0.0, 0.0),
@@ -298,7 +298,7 @@ class GraphicsProgram3D:
         self.model_matrix.add_translation(9, 5.0, -3.3)
         self.model_matrix.add_scale(1.0, 7.0, 1.0)
         self.shader.set_model_matrix(self.model_matrix.matrix)
-        self.cube.draw()
+        self.cube.draw(self.shader)
         self.model_matrix.pop_matrix()
 
         # Small cube
