@@ -2,6 +2,7 @@ from aabbtree import AABB, AABBTree
 from Base3DObjects import Point, Vector
 
 
+
 # Object that helps with collision detection using the AABBTree object
 
 class Collision:
@@ -37,21 +38,30 @@ class Collision:
         if (self.is_between(player, obj, "x")) and (self.is_between(player, obj, "z")):
             if obj["pos"].y < player["pos"].y:
                 print("top")
-                return Vector(0.0, 0.0, 0.0)
+                return Vector(player["direction"].x, 0, player["direction"].z).normalize()
             else:
                 print("bottom")
+                return Vector(player["direction"].x, 0, player["direction"].z).normalize()
 
         if (self.is_between(player, obj, "x")) and (self.is_between(player, obj, "y")):
             if obj["pos"].z < player["pos"].z:
                 print("north")
+                return Vector(player["direction"].x, player["direction"].y, 0).normalize()
             else:
                 print("south")
+                return Vector(player["direction"].x, player["direction"].y, 0).normalize()
 
         if (self.is_between(player, obj, "y")) and (self.is_between(player, obj, "z")):
             if obj["pos"].x < player["pos"].x:
                 print("east")
+                return Vector(0, player["direction"].y, player["direction"].z).normalize()
             else:
                 print("west")
+                return Vector(0, player["direction"].y, player["direction"].z).normalize()
+
+    def get_slide_vector(self, player, obj):
+        surface_vector = self.get_colliding_face(player, obj)
+        return surface_vector * player["direction"].dot(surface_vector)
 
 
 class BezierMotion:
