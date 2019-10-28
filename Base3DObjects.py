@@ -66,9 +66,10 @@ class Vector:
 
     def normalize(self):
         length = self.__len__()
-        self.x /= length
-        self.y /= length
-        self.z /= length
+        if length != 0:
+            self.x /= length
+            self.y /= length
+            self.z /= length
         return self
 
     def dot(self, other):

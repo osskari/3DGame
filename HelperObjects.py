@@ -2,9 +2,7 @@ from aabbtree import AABB, AABBTree
 from Base3DObjects import Point, Vector
 
 
-
 # Object that helps with collision detection using the AABBTree object
-
 class Collision:
     def __init__(self):
         self.tree = AABBTree()
@@ -29,39 +27,37 @@ class Collision:
     def collision_objects(self, point, bound):
         return self.tree.overlap_values(self.get_aabb(point, bound))
 
-    def is_between(self, player, object, axis):
-        num = (0 if axis == "x" else 1 if axis == "y" else 2)
-        return object["pos"][num] - object["scale"][num] - player["scale"][num] < player["pos"][num] < object["pos"][
-            num] + object["scale"][num] + player["scale"][num]
+    # checks if player is between bounds of object on an axis with respect to size of both
+    def is_between(self, player, obj, axis):
+        return obj["pos"][axis] - obj["scale"][axis] - player["scale"][axis]\
+            < player["pos"][axis]\
+            < obj["pos"][axis] + obj["scale"][axis] + player["scale"][axis]
 
+    # Finds which side of a cube the player is touching
     def get_colliding_face(self, player, obj):
-        if (self.is_between(player, obj, "x")) and (self.is_between(player, obj, "z")):
-            if obj["pos"].y < player["pos"].y:
-                print("top")
-                return Vector(player["direction"].x, 0, player["direction"].z).normalize()
-            else:
-                print("bottom")
-                return Vector(player["direction"].x, 0, player["direction"].z).normalize()
+        # Zeroes the axis of the plane on the object the player is touching
+        directions = (1 if self.is_between(player, obj, 0) else 0,
+                      1 if self.is_between(player, obj, 1) else 0,
+                      1 if self.is_between(player, obj, 2) else 0)
+        # Returns a normalized vector that represents the direction of the surface
+        # Direction on the non zeroed axes based on player movement
+        return Vector(player["direction"].x * directions[0], player["direction"].y * directions[1], player["direction"].z * directions[2]).normalize()
 
-        if (self.is_between(player, obj, "x")) and (self.is_between(player, obj, "y")):
-            if obj["pos"].z < player["pos"].z:
-                print("north")
-                return Vector(player["direction"].x, player["direction"].y, 0).normalize()
-            else:
-                print("south")
-                return Vector(player["direction"].x, player["direction"].y, 0).normalize()
-
-        if (self.is_between(player, obj, "y")) and (self.is_between(player, obj, "z")):
-            if obj["pos"].x < player["pos"].x:
-                print("east")
-                return Vector(0, player["direction"].y, player["direction"].z).normalize()
-            else:
-                print("west")
-                return Vector(0, player["direction"].y, player["direction"].z).normalize()
-
+    # Returns slide vector for player on collided object
     def get_slide_vector(self, player, obj):
         surface_vector = self.get_colliding_face(player, obj)
         return surface_vector * player["direction"].dot(surface_vector)
+
+    # Returns motion vector of player
+    def move(self, player):
+        # If no collision return direction directly
+        if(not self.point_collision(player["newpos"], player["scale"])):
+            return player["direction"]
+        else:
+            # If collision, get slide vector for each object collided with
+            for item in self.collision_objects(player["newpos"], player["scale"]):
+                player["direction"] = self.get_slide_vector(player, item)
+            return player["direction"]
 
 
 class BezierMotion:
