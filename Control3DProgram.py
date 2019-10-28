@@ -58,6 +58,10 @@ class GraphicsProgram3D:
             "JUMP": False
         }
 
+        self.texture_id01_brick = self.load_texture(sys.path[0] + "/textures/bricks.jpg")
+        self.texture_id02_graybrick = self.load_texture(sys.path[0] + "/textures/graybricks.jpg")
+        self.bind_textures()
+
         # Velocity
         self.v = VELOCITY
         # Mass
@@ -71,6 +75,29 @@ class GraphicsProgram3D:
 
 
         self.white_background = False
+
+    def load_texture(self, path):
+        surface = pygame.image.load(path)
+        tex_string = pygame.image.tostring(surface, "RGBA", 1)
+        tex_width = surface.get_width()
+        tex_height = surface.get_height()
+        tex_id = glGenTextures(1)
+        glBindTexture(GL_TEXTURE_2D, tex_id)
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, tex_width, tex_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, tex_string)
+        return tex_id
+
+    def bind_textures(self):
+        """
+        Binds all textures to a number, texture can then be accessed
+        via self.shader.set_diffuse_texture(n)
+        """
+        
+        glActiveTexture(GL_TEXTURE0)
+        glBindTexture(GL_TEXTURE_2D, self.texture_id01_brick)
+        glActiveTexture(GL_TEXTURE1)
+        glBindTexture(GL_TEXTURE_2D, self.texture_id02_graybrick)
 
     def update(self):
         delta_time = self.clock.tick() / 1000.0
@@ -173,13 +200,13 @@ class GraphicsProgram3D:
 
         # self.shader.set_light_position(*self.view_matrix.eye)
         self.shader.set_eye_position(*self.view_matrix.eye)
-        self.shader.set_light_position(*Point(0, 10, 0))
+        self.shader.set_light_position(*self.view_matrix.eye)
         self.shader.set_light_diffuse(1.0, 1.0, 1.0)
 
-        self.shader.set_light_specular(1.0, 1.0, 1.0)
-        self.shader.set_material_specular(1.0, 1.0, 1.0)
-        self.shader.set_light_ambient(0.1, 0.1, 0.1)
-        self.shader.set_material_shininess(13)
+        self.shader.set_light_specular(0.5, 0.5, 0.5)
+        self.shader.set_material_specular(0.4, 0.4, 0.4)
+        self.shader.set_light_ambient(0.4, 0.4, 0.4)
+        self.shader.set_material_shininess(4)
 
         self.model_matrix.load_identity()
 
@@ -193,17 +220,32 @@ class GraphicsProgram3D:
         self.cube.draw()
         self.model_matrix.pop_matrix()
 
+        # Small cube
+        self.shader.set_using_texture(1.0)
 
-        self.shader.set_material_diffuse(1.0, 0.0, 0.0)
-        self.shader.set_material_specular
+        self.shader.set_diffuse_texture(0) 
+
         self.model_matrix.push_matrix()
+        self.shader.set_material_diffuse(0.5, 0.5, 0.5)
         self.model_matrix.add_translation(0.0, 0.0, 0.0)
         self.model_matrix.add_scale(0.5, 0.5, 0.5)
         self.shader.set_model_matrix(self.model_matrix.matrix)
         self.cube.draw()
         self.model_matrix.pop_matrix()
 
-        self.shader.set_material_diffuse(0.0, 1.0, 0.0)
+        self.shader.set_diffuse_texture(1)
+
+        self.model_matrix.push_matrix()
+        self.shader.set_material_diffuse(1.0, 1.0, 1.0)
+        self.model_matrix.add_translation(0.0, 1.0, 0.0)
+        self.model_matrix.add_scale(0.5, 0.5, 0.5)
+        self.shader.set_model_matrix(self.model_matrix.matrix)
+        self.cube.draw()
+        self.model_matrix.pop_matrix()
+
+        self.shader.set_using_texture(0.0)
+
+        self.shader.set_material_diffuse(1.0, 1.0, 1.0)
         self.model_matrix.push_matrix()
         self.model_matrix.add_translation(-5.0, -0.8, -5.0)
         self.model_matrix.add_scale(10.0, 0.8, 10.0)
