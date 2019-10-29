@@ -1,6 +1,6 @@
 from GameObjects.GameCube import GameCube
 
-class SandCube(GameCube):
+class TreeCube(GameCube):
     def __init__(self, position):
         super().__init__(position)
         # Öll hardcoded values eru placeholder
@@ -9,13 +9,10 @@ class SandCube(GameCube):
         self.specular = (1.0, 1.0, 1.0)
         self.shininess = 4
 
-    def hit(self):
-        self.hp -= 30
-
     def get_texture(self):
-        if self.hp > 70:
+        if self.hp > 90:
             return self.textures[0]
-        elif self.hp > 40:
+        elif self.hp > 50:
             return self.textures[1]
         else:
             return self.textures[2]
