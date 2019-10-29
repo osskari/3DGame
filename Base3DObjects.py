@@ -255,6 +255,7 @@ class OptimizedCube:
         glBindBuffer(GL_ARRAY_BUFFER, self.vertex_buffer_id)
         glBufferData(GL_ARRAY_BUFFER, numpy.array(vertex_array, dtype="float32"), GL_STATIC_DRAW)
         glBindBuffer(GL_ARRAY_BUFFER, 0)
+        vertex_array = None
 
     def set_vertices(self, shader):
         shader.set_attribute_buffers_with_uv(self.vertex_buffer_id)
