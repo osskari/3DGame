@@ -74,7 +74,7 @@ class GraphicsProgram3D:
 
         self.tree = Collision()
         self.tree.add_object(Point(9.0, 5.0, -2.0), (2.0, 2.0, 5.0))
-        self.tree.add_object(Point(-5.0, -0.8, -5.0), (10.0, 0.8, 10.0))
+        self.tree.add_object(Point(-5.0, -0.8, -5.0), (30.0, 0.8, 30.0))
         self.tree.add_object(Point(9, 5.0, -3.3), (5.0, 7.0, 1.0))
 
         self.cube1 = (Point(9.0, 5.0, -2.0), (2.0, 2.0, 2.0),
@@ -157,34 +157,34 @@ class GraphicsProgram3D:
         self.timer += delta_time
         self.angle += pi * delta_time
 
-        self.jump(delta_time)
-
-        eyebound = (0.2, 0.2, 0.2)
+        self.gravity(delta_time)
 
         if self.inputs["W"]:
             newpos = self.view_matrix.slide(0, 0, -10 * delta_time)
             self.view_matrix.eye += self.tree.move({"pos": self.view_matrix.eye, 
-                                                   "scale": eyebound, 
+                                                   "scale": self.view_matrix.bound, 
                                                    "direction": newpos - self.view_matrix.eye,
-                                                   "newpos": newpos})
+                                                   "newpos": newpos})["direction"]
         if self.inputs["S"]:
             newpos = self.view_matrix.slide(0, 0, 10 * delta_time)
             self.view_matrix.eye += self.tree.move({"pos": self.view_matrix.eye, 
-                                                   "scale": eyebound, 
+                                                   "scale": self.view_matrix.bound, 
                                                    "direction": newpos - self.view_matrix.eye,
-                                                   "newpos": newpos})
+                                                   "newpos": newpos})["direction"]
         if self.inputs["A"]:
             newpos = self.view_matrix.slide(-10 * delta_time, 0, 0)
             self.view_matrix.eye += self.tree.move({"pos": self.view_matrix.eye, 
-                                                   "scale": eyebound, 
+                                                   "scale": self.view_matrix.bound, 
                                                    "direction": newpos - self.view_matrix.eye,
-                                                   "newpos": newpos})
+                                                   "newpos": newpos})["direction"]
         if self.inputs["D"]:
             newpos = self.view_matrix.slide(10 * delta_time, 0, 0)
             self.view_matrix.eye += self.tree.move({"pos": self.view_matrix.eye, 
-                                                   "scale": eyebound, 
+                                                   "scale": self.view_matrix.bound, 
                                                    "direction": newpos - self.view_matrix.eye,
-                                                   "newpos": newpos})
+                                                   "newpos": newpos})["direction"]
+        if self.inputs["JUMP"]:
+            self.jump(delta_time)
         if self.inputs["Q"]:
             self.view_matrix.roll(pi * delta_time)
         if self.inputs["E"]:
@@ -207,6 +207,13 @@ class GraphicsProgram3D:
         self.mouse_look_movement(delta_time)
         self.mouse_angle_x  = 0
         self.mouse_angle_y  = 0
+
+    def gravity(self, delta_time):
+        newpos = Point(0, -9.8 * delta_time, 0)
+        self.view_matrix.eye += self.tree.move({"pos": self.view_matrix.eye, 
+                                                "scale": self.view_matrix.bound, 
+                                                "direction": newpos - self.view_matrix.eye,
+                                                "newpos": newpos})["direction"]
 
     def mouse_look_movement(self, delta_time):
         """
@@ -249,25 +256,37 @@ class GraphicsProgram3D:
 
         Function uses a simple velocity * mass formula to calculate a jumping curve
         """
+        # Momentum = mass * velocity
+        p = (self.m * self.v)
 
-        if self.inputs["JUMP"]:
-            # Momentum = mass * velocity
-            p = (self.m * self.v)
+        # Change position
+        # self.view_matrix.eye.y += p * delta_time
 
-            # Change position
-            self.view_matrix.eye.y += p * delta_time
-            # Change velocity
-            self.v = self.v - 1
+        newpos = Point(self.view_matrix.eye.x, self.view_matrix.eye.y + (delta_time * p), self.view_matrix.eye.z)
+        # print(newpos - self.view_matrix.eye)
+        player = self.tree.move({"pos": self.view_matrix.eye, 
+                                                "scale": self.view_matrix.bound, 
+                                                "direction": newpos - self.view_matrix.eye,
+                                                "newpos": newpos})
+        self.view_matrix.eye += player["direction"]
+        # print(self.v)
+        # Change velocity
+        self.v = self.v - 1
 
-            # Hugsanlega skoða það að breyta hvernig annað movement virkar
-            # A meðan player er að hoppa?
-            # TODO hafa annað condition fyrir til að stoppa jump ef player
-            # collide-ar við eitthvað fyrir neðan sig???
+        if (1,0,1) in player["collision"]:
+            self.inputs["JUMP"] = False
+            # self.v = 0
+        # print(self.v)
 
-            # Stop the jump when it reaches the bottom of the 'curve'
-            if self.v == -VELOCITY - 1:
-                self.inputs["JUMP"] = False
-                self.v = VELOCITY
+        # Hugsanlega skoða það að breyta hvernig annað movement virkar
+        # A meðan player er að hoppa?
+        # TODO hafa annað condition fyrir til að stoppa jump ef player
+        # collide-ar við eitthvað fyrir neðan sig???
+
+        # Stop the jump when it reaches the bottom of the 'curve'
+        if self.v == -VELOCITY - 1:
+            self.inputs["JUMP"] = False
+            self.v = VELOCITY
 
     def display(self):
         glEnable(GL_DEPTH_TEST)

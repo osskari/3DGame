@@ -36,28 +36,35 @@ class Collision:
     # Finds which side of a cube the player is touching
     def get_colliding_face(self, player, obj):
         # Zeroes the axis of the plane on the object the player is touching
-        directions = (1 if self.is_between(player, obj, 0) else 0,
-                      1 if self.is_between(player, obj, 1) else 0,
-                      1 if self.is_between(player, obj, 2) else 0)
+        return (1 if self.is_between(player, obj, 0) else 0,
+                1 if self.is_between(player, obj, 1) else 0,
+                1 if self.is_between(player, obj, 2) else 0)
+
+    def get_surface_vector(self, player, obj):
+        directions = self.get_colliding_face(player, obj)
         # Returns a normalized vector that represents the direction of the surface
         # Direction on the non zeroed axes based on player movement
         return Vector(player["direction"].x * directions[0], player["direction"].y * directions[1], player["direction"].z * directions[2]).normalize()
 
     # Returns slide vector for player on collided object
     def get_slide_vector(self, player, obj):
-        surface_vector = self.get_colliding_face(player, obj)
+        surface_vector = self.get_surface_vector(player, obj)
         return surface_vector * player["direction"].dot(surface_vector)
 
     # Returns motion vector of player
     def move(self, player):
         # If no collision return direction directly
         if(not self.point_collision(player["newpos"], player["scale"])):
-            return player["direction"]
+            player["collision"] = []
+            return player
         else:
+            player["collision"] = []
             # If collision, get slide vector for each object collided with
             for item in self.collision_objects(player["newpos"], player["scale"]):
                 player["direction"] = self.get_slide_vector(player, item)
-            return player["direction"]
+                player["collision"].append(
+                    self.get_colliding_face(player, item))
+            return player
 
 
 class BezierMotion:
