@@ -230,12 +230,13 @@ class GraphicsProgram3D:
         if self.mouse_move != (0, 0):
             self.hand_angle_z  -= (self.mouse_move[0] * SENSITIVITY) * delta_time
             self.hand_angle_x  -= (self.mouse_move[1] * SENSITIVITY) * delta_time
+            #TODO breyta svo mouse movement noti ekki delta time
             if self.mouse_move[0] < 0:
                 self.view_matrix.rotateY(
-                    (self.mouse_move[0] * SENSITIVITY) * delta_time)
+                    self.mouse_move[0] * SENSITIVITY * delta_time)
             elif self.mouse_move[0] > 0:
                 self.view_matrix.rotateY(
-                    (self.mouse_move[0] * SENSITIVITY) * delta_time)
+                    self.mouse_move[0] * SENSITIVITY * delta_time)
             if self.mouse_move[1] < 0:
                 # Make sure the player can not look further than straight up
                 if self.view_matrix.n.y > -0.99:
@@ -339,7 +340,6 @@ class GraphicsProgram3D:
         self.shader.set_using_texture(1.0)
 
         self.shader.set_diffuse_texture(0)
-
         self.model_matrix.push_matrix()
         self.shader.set_material_diffuse(0.5, 0.5, 0.5)
         self.model_matrix.add_translation(0.5, 0.5, 0.5)
@@ -370,7 +370,7 @@ class GraphicsProgram3D:
         self.model_matrix.add_translation(-5.0, -0.8, -5.0)
         self.model_matrix.add_scale(10.0, 0.8, 10.0)
         self.shader.set_model_matrix(self.model_matrix.matrix)
-        self.cube.draw(self.shader)
+        #self.cube.draw(self.shader)
         self.model_matrix.pop_matrix()
 
         ######## Drawing spheres #########
@@ -394,7 +394,29 @@ class GraphicsProgram3D:
         self.sphere.draw(self.shader)
         self.model_matrix.pop_matrix()
 
+        #self.render_map()
+
         pygame.display.flip()
+
+    def render_map(self):
+        self.shader.set_diffuse_texture(0)
+        self.shader.set_using_texture(0.0)
+        #glEnable(GL_CULL_FACE)
+        #glCullFace(GL_BACK)
+        #glFrontFace(GL_CW)
+
+        for y in range(0, 4):
+            for x in range(0, 8):
+                for z in range(0, 8):
+                    self.model_matrix.push_matrix()
+                    self.shader.set_material_diffuse(0.5, 0.5, 0.5)
+                    self.model_matrix.add_scale(0.5, 0.5, 0.5)
+                    self.model_matrix.add_translation(x, y, z)
+                    self.shader.set_model_matrix(self.model_matrix.matrix)
+                    self.cube.draw(self.shader)
+                    self.model_matrix.pop_matrix()
+
+        #glDisable(GL_CULL_FACE)
 
     def program_loop(self):
         exiting = False
