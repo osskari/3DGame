@@ -1,27 +1,35 @@
 from HelperObjects import Collision
 from Base3DObjects import Point, OptimizedCube as Cube, OptimizedSphere as Sphere
 
-gameobjs = [
-    {
-        "pos": Point(0, 0, 0),
-        "scale": (30, 0.5, 30),
-        "diffuse": (1, 1, 1),
-        "specular": (1, 1, 1),
-        "shininess": 13,
-        "type": "CUBE",
-        "texture": 1
-    }
-]
-
 
 class Map:
     def __init__(self):
-        self.objects = gameobjs
+        self.objects = [
+            {
+                "pos": Point(0, 0, 0),
+                "scale": (30, 0.5, 30),
+                "diffuse": (1, 1, 1),
+                "specular": (1, 1, 1),
+                "shininess": 13,
+                "type": "CUBE",
+                "texture": 1
+            },
+            {
+                "pos": Point(0, 10, 0),
+                "scale": (10, 0.5, 10),
+                "diffuse": (1, 1, 1),
+                "specular": (1, 1, 1),
+                "shininess": 13,
+                "type": "CUBE",
+                "texture": 1
+            }
+        ]
         self.tree = Collision(self.objects)
         self.types = {
             "CUBE": Cube(),
             "SPHERE": Sphere()
         }
+        self.last = None
 
     def add_object(self, obj):
         self.objects.push(obj)
@@ -29,6 +37,8 @@ class Map:
 
     def draw(self, shader, model_matrix):
         for item in self.objects:
+            if not self.last or not self.last == item["type"]:
+                self.types[item["type"]].set_vertices(shader)
             if item["texture"] is not None:
                 shader.set_using_texture(1.0)
             else:
