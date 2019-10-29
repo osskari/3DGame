@@ -136,7 +136,6 @@ class Cube:
                              1.0, 0.0, 0.0,
                              1.0, 0.0, 0.0,
                              1.0, 0.0, 0.0]
-
         self.uv_array = [0.0, 0.0,
                          0.0, 1.0,
                          1.0, 1.0,
@@ -258,8 +257,11 @@ class OptimizedCube:
         glBindBuffer(GL_ARRAY_BUFFER, 0)
         vertex_array = None
 
-    def draw(self, shader):
+    def set_vertices(self, shader):
         shader.set_attribute_buffers_with_uv(self.vertex_buffer_id)
+
+    def draw(self, shader):
+        glBindBuffer(GL_ARRAY_BUFFER, self.vertex_buffer_id)
         glDrawArrays(GL_TRIANGLE_FAN, 0, 4)
         glDrawArrays(GL_TRIANGLE_FAN, 4, 4)
         glDrawArrays(GL_TRIANGLE_FAN, 8, 4)
