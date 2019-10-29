@@ -58,11 +58,13 @@ class Shader3D:
         self.sunSpecularLoc = glGetUniformLocation(self.renderingProgramID, "u_sun_specular")
         self.sunAmbientLoc = glGetUniformLocation(self.renderingProgramID, "u_sun_ambient")
 
+        self.moonPosLoc = glGetUniformLocation(self.renderingProgramID, "u_moon_position")
+        self.moonDiffuseLoc = glGetUniformLocation(self.renderingProgramID, "u_moon_diffuse")
+        self.moonSpecularLoc = glGetUniformLocation(self.renderingProgramID, "u_moon_specular")
+        self.moonAmbientLoc = glGetUniformLocation(self.renderingProgramID, "u_moon_ambient")
 
         self.materialDiffuseLoc = glGetUniformLocation(self.renderingProgramID, "u_mat_diffuse")
         self.materialSpecularLoc = glGetUniformLocation(self.renderingProgramID, "u_mat_specular")
-
-
 
         self.modelMatrixLoc = glGetUniformLocation(self.renderingProgramID, "u_model_matrix")
         self.viewMatrixLoc = glGetUniformLocation(self.renderingProgramID, "u_view_matrix")
@@ -111,6 +113,7 @@ class Shader3D:
     def set_light_specular(self, r, g, b):
         glUniform4f(self.lightSpecularLoc, r, g, b, 1.0)
 
+    # Setting parameters for the light from the sun
     def set_sun_position(self, x, y, z):
         glUniform4f(self.sunPosLoc, x, y, z, 1.0)
 
@@ -122,6 +125,19 @@ class Shader3D:
 
     def set_sun_specular(self, r, g, b):
         glUniform4f(self.sunSpecularLoc, r, g, b, 1.0)
+
+    # Setting parameters for the light from the moon
+    def set_moon_position(self, x, y, z):
+        glUniform4f(self.moonPosLoc, x, y, z, 1.0)
+
+    def set_moon_diffuse(self, r, g, b):
+        glUniform4f(self.moonDiffuseLoc, r, g, b, 1.0)
+
+    def set_moon_ambient(self, r, g, b):
+        glUniform4f(self.moonAmbientLoc, r, g, b, 1.0)
+
+    def set_moon_specular(self, r, g, b):
+        glUniform4f(self.moonSpecularLoc, r, g, b, 1.0)
 
     def set_material_diffuse(self, r, g, b):
         glUniform4f(self.materialDiffuseLoc, r, g, b, 1.0)
@@ -138,8 +154,10 @@ class Shader3D:
     def set_attribute_buffers_with_uv(self, vertex_buffer_id):
         glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer_id)
         glVertexAttribPointer(self.positionLoc, 3, GL_FLOAT, False, 8 * sizeof(GLfloat), OpenGL.GLU.ctypes.c_void_p(0))
-        glVertexAttribPointer(self.normalLoc, 3, GL_FLOAT, False, 8 * sizeof(GLfloat), OpenGL.GLU.ctypes.c_void_p(3 * sizeof(GLfloat)))
-        glVertexAttribPointer(self.uvLoc, 2, GL_FLOAT, False, 8 * sizeof(GLfloat), OpenGL.GLU.ctypes.c_void_p(6 * sizeof(GLfloat)))
+        glVertexAttribPointer(self.normalLoc, 3, GL_FLOAT, False, 8 * sizeof(GLfloat),
+                              OpenGL.GLU.ctypes.c_void_p(3 * sizeof(GLfloat)))
+        glVertexAttribPointer(self.uvLoc, 2, GL_FLOAT, False, 8 * sizeof(GLfloat),
+                              OpenGL.GLU.ctypes.c_void_p(6 * sizeof(GLfloat)))
 
     def set_uv_attribute(self, vertex_array):
         glVertexAttribPointer(self.uvLoc, 2, GL_FLOAT, False, 0, vertex_array)
@@ -155,5 +173,3 @@ class Shader3D:
     
     def set_specular_texture(self, n):
         glUniform1i(self.specularTextureLoc, n)
-
-

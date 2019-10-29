@@ -21,6 +21,7 @@ from GameObjects.Sky import *
 from GameObjects.GameCube import GameCube
 from GameObjects.SandCube import SandCube
 
+
 class GraphicsProgram3D:
     def __init__(self):
 
@@ -55,21 +56,25 @@ class GraphicsProgram3D:
         self.angle = 0
 
         self.sunMotion = BezierMotion(
-            0,
-            40,
+            -30,
+            30,
             Point(-50.0, -30.0, 0.0),
-            Point(-50.0, 30.0, 0.0),
-            Point(50.0, 30.0, 0.0),
-            Point(50.0, -30.0, 0.0)
+            Point(-50.0, 30.0, 10.0),
+            Point(50.0, 30.0, 10.0),
+            Point(50.0, -30.0, 0.0),
+            Point(0.0, -40.0, -10.0),
+            Point(-50.0, -30.0, 0.0)
         )
 
         self.moonMotion = BezierMotion(
-            40,
-            80,
-            Point(-50.0, -30.0, 0.0),
-            Point(-50.0, 30.0, 0.0),
-            Point(50.0, 30.0, 0.0),
-            Point(50.0, -30.0, 0.0)
+            0,
+            60,
+            Point(-50.0, -50.0, 0.0),
+            Point(-50.0, 50.0, 10.0),
+            Point(50.0, 50.0, 10.0),
+            Point(50.0, -50.0, 0.0),
+            Point(0.0, -40.0, -10.0),
+            Point(-50.0, -30.0, 0.0)
         )
 
         self.tree = Collision()
@@ -157,32 +162,32 @@ class GraphicsProgram3D:
         self.timer += delta_time
         self.angle += pi * delta_time
 
-        self.gravity(delta_time)
+        # self.gravity(delta_time)
 
         if self.inputs["W"]:
             newpos = self.view_matrix.slide(0, 0, -10 * delta_time)
-            self.view_matrix.eye += self.tree.move({"pos": self.view_matrix.eye, 
-                                                   "scale": self.view_matrix.bound, 
-                                                   "direction": newpos - self.view_matrix.eye,
-                                                   "newpos": newpos})["direction"]
+            self.view_matrix.eye += self.tree.move({"pos": self.view_matrix.eye,
+                                                    "scale": self.view_matrix.bound,
+                                                    "direction": newpos - self.view_matrix.eye,
+                                                    "newpos": newpos})["direction"]
         if self.inputs["S"]:
             newpos = self.view_matrix.slide(0, 0, 10 * delta_time)
-            self.view_matrix.eye += self.tree.move({"pos": self.view_matrix.eye, 
-                                                   "scale": self.view_matrix.bound, 
-                                                   "direction": newpos - self.view_matrix.eye,
-                                                   "newpos": newpos})["direction"]
+            self.view_matrix.eye += self.tree.move({"pos": self.view_matrix.eye,
+                                                    "scale": self.view_matrix.bound,
+                                                    "direction": newpos - self.view_matrix.eye,
+                                                    "newpos": newpos})["direction"]
         if self.inputs["A"]:
             newpos = self.view_matrix.slide(-10 * delta_time, 0, 0)
-            self.view_matrix.eye += self.tree.move({"pos": self.view_matrix.eye, 
-                                                   "scale": self.view_matrix.bound, 
-                                                   "direction": newpos - self.view_matrix.eye,
-                                                   "newpos": newpos})["direction"]
+            self.view_matrix.eye += self.tree.move({"pos": self.view_matrix.eye,
+                                                    "scale": self.view_matrix.bound,
+                                                    "direction": newpos - self.view_matrix.eye,
+                                                    "newpos": newpos})["direction"]
         if self.inputs["D"]:
             newpos = self.view_matrix.slide(10 * delta_time, 0, 0)
-            self.view_matrix.eye += self.tree.move({"pos": self.view_matrix.eye, 
-                                                   "scale": self.view_matrix.bound, 
-                                                   "direction": newpos - self.view_matrix.eye,
-                                                   "newpos": newpos})["direction"]
+            self.view_matrix.eye += self.tree.move({"pos": self.view_matrix.eye,
+                                                    "scale": self.view_matrix.bound,
+                                                    "direction": newpos - self.view_matrix.eye,
+                                                    "newpos": newpos})["direction"]
         if self.inputs["JUMP"]:
             self.jump(delta_time)
         if self.inputs["Q"]:
@@ -198,11 +203,8 @@ class GraphicsProgram3D:
         if self.inputs["RIGHT"]:
             self.view_matrix.yaw(pi * delta_time)
 
-
-        if self.sun.bezier_done(self.timer):
-            self.sun.restart_motion(self.moon.bezier_motion.end_time)
-        if self.moon.bezier_done(self.timer):
-            self.moon.restart_motion(self.sun.bezier_motion.end_time)
+        self.sun.bezier_done(self.timer)
+        self.moon.bezier_done(self.timer)
 
         self.mouse_look_movement(delta_time)
         self.mouse_angle_x = 0
@@ -210,8 +212,8 @@ class GraphicsProgram3D:
 
     def gravity(self, delta_time):
         newpos = Point(0, -9.8 * delta_time, 0)
-        self.view_matrix.eye += self.tree.move({"pos": self.view_matrix.eye, 
-                                                "scale": self.view_matrix.bound, 
+        self.view_matrix.eye += self.tree.move({"pos": self.view_matrix.eye,
+                                                "scale": self.view_matrix.bound,
                                                 "direction": newpos - self.view_matrix.eye,
                                                 "newpos": newpos})["direction"]
 
@@ -262,18 +264,18 @@ class GraphicsProgram3D:
         # Change position
         # self.view_matrix.eye.y += p * delta_time
 
-        newpos = Point(self.view_matrix.eye.x, self.view_matrix.eye.y + (delta_time * p), self.view_matrix.eye.z)
+        newpos = Point(self.view_matrix.eye.x, self.view_matrix.eye.y + (p * delta_time), self.view_matrix.eye.z)
         # print(newpos - self.view_matrix.eye)
-        player = self.tree.move({"pos": self.view_matrix.eye, 
-                                                "scale": self.view_matrix.bound, 
-                                                "direction": newpos - self.view_matrix.eye,
-                                                "newpos": newpos})
+        player = self.tree.move({"pos": self.view_matrix.eye,
+                                 "scale": self.view_matrix.bound,
+                                 "direction": newpos - self.view_matrix.eye,
+                                 "newpos": newpos})
         self.view_matrix.eye += player["direction"]
         # print(self.v)
         # Change velocity
         self.v = self.v - 1
 
-        if (1,0,1) in player["collision"]:
+        if (1, 0, 1) in player["collision"]:
             self.inputs["JUMP"] = False
             # self.v = 0
         # print(self.v)
@@ -309,9 +311,15 @@ class GraphicsProgram3D:
         self.shader.set_light_ambient(0.1, 0.1, 0.1)
 
         self.shader.set_sun_position(*self.sun.get_position(self.timer))
-        self.shader.set_sun_diffuse(1.0, 1.0, 1.0)
+        self.shader.set_sun_diffuse(0.6, 0.6, 0.6)
         self.shader.set_sun_specular(0.5, 0.5, 0.5)
         self.shader.set_sun_ambient(0.4, 0.4, 0.4)
+
+        self.shader.set_moon_position(*self.moon.get_position(self.timer))
+        print(0x7d / 256, 0x7f / 256, 0x83 / 256)
+        self.shader.set_moon_diffuse(0x7d / 256, 0x7f / 256, 0x83 / 256)
+        self.shader.set_moon_specular(0x7d / 256, 0x7f / 256, 0x83 / 256)
+        self.shader.set_moon_ambient(0x7d / 256, 0x7f / 256, 0x83 / 256)
 
         self.shader.set_material_specular(0.4, 0.4, 0.4)
         self.shader.set_material_shininess(10)
@@ -385,7 +393,7 @@ class GraphicsProgram3D:
         self.shader.set_material_diffuse(*self.sun.diffuse)
         self.model_matrix.push_matrix()
         self.model_matrix.add_translation(*self.sun.get_position(self.timer))
-        self.model_matrix.add_scale(0.5, 0.5, 0.5)
+        self.model_matrix.add_scale(2.5, 2.5, 2.5)
         self.shader.set_model_matrix(self.model_matrix.matrix)
         self.sphere.draw(self.shader)
         self.model_matrix.pop_matrix()
@@ -394,25 +402,26 @@ class GraphicsProgram3D:
         self.shader.set_material_diffuse(*self.moon.diffuse)
         self.model_matrix.push_matrix()
         self.model_matrix.add_translation(*self.moon.get_position(self.timer))
-        self.model_matrix.add_scale(0.5, 0.5, 0.5)
+        self.model_matrix.add_scale(2.5, 2.5, 2.5)
         self.shader.set_model_matrix(self.model_matrix.matrix)
         self.sphere.draw(self.shader)
         self.model_matrix.pop_matrix()
 
         ## Test
-
+        self.shader.set_diffuse_texture(self.texture_id01_graybrick)
+        self.shader.set_using_texture(1.0)
+        self.shader.set_using_specular_texture(0.0)
         self.shader.set_diffuse_texture(self.moon.texture)
         self.shader.set_material_diffuse(*self.moon.diffuse)
         self.cube.set_vertices(self.shader)
-        for x in range(8):
-            for y in range(8):
-                for z in range(8):
-                    self.model_matrix.push_matrix()
-                    self.model_matrix.add_translation(x, y, z)
-                    self.model_matrix.add_scale(0.8, 0.8, 0.8)
-                    self.shader.set_model_matrix(self.model_matrix.matrix)
-                    self.cube.draw(self.shader)
-                    self.model_matrix.pop_matrix()
+        for x in range(10):
+            for z in range(10):
+                self.model_matrix.push_matrix()
+                self.model_matrix.add_translation(x * 2, 0, z * 2)
+                self.model_matrix.add_scale(1.98, 1.98, 1.98)
+                self.shader.set_model_matrix(self.model_matrix.matrix)
+                self.cube.draw(self.shader)
+                self.model_matrix.pop_matrix()
 
         pygame.display.flip()
 

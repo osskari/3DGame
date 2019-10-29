@@ -7,6 +7,9 @@ varying vec4 v_h;
 varying vec4 v_s_sun;
 varying vec4 v_h_sun;
 
+varying vec4 v_s_moon;
+varying vec4 v_h_moon;
+
 varying vec2 v_uv;
 
 uniform vec4 u_light_diffuse;
@@ -17,10 +20,13 @@ uniform vec4 u_sun_diffuse;
 uniform vec4 u_sun_specular;
 uniform vec4 u_sun_ambient;
 
+uniform vec4 u_moon_diffuse;
+uniform vec4 u_moon_specular;
+uniform vec4 u_moon_ambient;
+
 uniform vec4 u_mat_diffuse;
 uniform vec4 u_mat_specular;
 uniform vec4 u_mat_ambient;
-
 
 //Taka út eða breyta ef við ætlum að nota textures.
 uniform sampler2D u_tex01;
@@ -49,6 +55,9 @@ void main(void)
 	float s_sun_len = length(v_s_sun);
 	float h_sun_len = length(v_h_sun);
 
+	float s_moon_len = length(v_s_moon);
+	float h_moon_len = length(v_h_moon);
+
 	float n_len = length(v_normal);
 
 	float lambert = max(dot(v_normal, v_s) / (n_len * s_len), 0.0);
@@ -57,11 +66,16 @@ void main(void)
 	float sun_lambert = max(dot(v_normal, v_s_sun) / (n_len * s_sun_len), 0.0);
 	float sun_phong = max(dot(v_normal, v_h_sun) / (n_len * h_sun_len), 0.0);
 
+	float moon_lambert = max(dot(v_normal, v_s_moon) / (n_len * s_moon_len), 0.0);
+	float moon_phong = max(dot(v_normal, v_h_moon) / (n_len * h_moon_len), 0.0);
 
-    gl_FragColor = u_light_ambient //* u_mat_ambient
-				 + u_light_diffuse * mat_diffuse * lambert
+
+    gl_FragColor = //u_light_ambient //* u_mat_ambient
+				  u_light_diffuse * mat_diffuse * lambert
 				 + u_light_specular * mat_specular * pow(phong, u_mat_shininess)
 				 //+ (u_sun_ambient
 				 + u_sun_diffuse * mat_diffuse * sun_lambert
-				 + u_sun_specular * mat_specular * pow(sun_phong, u_mat_shininess);
+				 + u_sun_specular * mat_specular * pow(sun_phong, u_mat_shininess)
+				 + u_moon_diffuse * mat_diffuse * moon_lambert
+				 + u_moon_specular * mat_specular * pow(moon_phong, u_mat_shininess);
 }
