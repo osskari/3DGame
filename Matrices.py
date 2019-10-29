@@ -125,6 +125,13 @@ class ViewMatrix:
         self.u.normalize()
         self.v = self.n.cross(self.u)
 
+    def walk(self, del_u, del_v, del_n):
+        vec = Vector(0, 1, 0).cross(self.u)
+        self.eye.x -= del_n * vec.x
+        self.eye.z -= del_n * vec.z
+        return self.eye
+
+
     def slide(self, del_u, del_v, del_n):
         return self.eye + self.u * del_u + self.v * del_v + self.n * del_n
 
@@ -152,10 +159,6 @@ class ViewMatrix:
         self.n = self.u * -s + self.n * c
         self.u = tmp_u
 
-    def walk(self, delta):
-        newpos = Vector(delta * self.n.x, 0, delta * self.n.z)
-        self.set_aabb(vector=newpos)
-        return newpos
 
     def rotateY(self, angle):
         """

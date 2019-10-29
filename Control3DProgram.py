@@ -123,9 +123,6 @@ class GraphicsProgram3D:
 
         self.white_background = False
 
-        self.hand_angle_x = -1
-        self.hand_angle_z = 0
-
     def load_texture(self, path):
         surface = pygame.image.load(path)
         tex_string = pygame.image.tostring(surface, "RGBA", 1)
@@ -163,13 +160,13 @@ class GraphicsProgram3D:
             self.gravity(delta_time)
 
         if self.inputs["W"]:
-            newpos = self.view_matrix.slide(0, 0, -10 * delta_time)
+            newpos = self.view_matrix.walk(0, 0, -10 * delta_time)
             self.view_matrix.eye += self.tree.move({"pos": self.view_matrix.eye, 
                                                    "scale": self.view_matrix.bound, 
                                                    "direction": newpos - self.view_matrix.eye,
                                                    "newpos": newpos})["direction"]
         if self.inputs["S"]:
-            newpos = self.view_matrix.slide(0, 0, 10 * delta_time)
+            newpos = self.view_matrix.walk(0, 0, 10 * delta_time)
             self.view_matrix.eye += self.tree.move({"pos": self.view_matrix.eye, 
                                                    "scale": self.view_matrix.bound, 
                                                    "direction": newpos - self.view_matrix.eye,
