@@ -93,7 +93,8 @@ class GraphicsProgram3D:
             "RIGHT": False,
             "Q": False,
             "E": False,
-            "JUMP": False
+            "JUMP": False,
+            "G": False
         }
 
         self.texture_id00_brick = self.load_texture(
@@ -111,6 +112,7 @@ class GraphicsProgram3D:
 
         # Velocity
         self.v = VELOCITY
+        self.gv = 0
         # Mass
         self.m = MASS
 
@@ -157,7 +159,8 @@ class GraphicsProgram3D:
         self.timer += delta_time
         self.angle += pi * delta_time
 
-        self.gravity(delta_time)
+        if self.inputs["G"] and not self.inputs["JUMP"]:
+            self.gravity(delta_time)
 
         if self.inputs["W"]:
             newpos = self.view_matrix.slide(0, 0, -10 * delta_time)
@@ -209,11 +212,15 @@ class GraphicsProgram3D:
         self.mouse_angle_y  = 0
 
     def gravity(self, delta_time):
-        newpos = Point(0, -9.8 * delta_time, 0)
-        self.view_matrix.eye += self.tree.move({"pos": self.view_matrix.eye, 
+        self.gv += -0.2 * delta_time
+        newpos = Point(self.view_matrix.eye.x, self.view_matrix.eye.y + self.gv, self.view_matrix.eye.z)
+        player = self.tree.move({"pos": self.view_matrix.eye, 
                                                 "scale": self.view_matrix.bound, 
                                                 "direction": newpos - self.view_matrix.eye,
-                                                "newpos": newpos})["direction"]
+                                                "newpos": newpos})
+        self.view_matrix.eye += player["direction"]
+        if (1,0,1) in player["collision"]:
+            self.gv = 0
 
     def mouse_look_movement(self, delta_time):
         """
@@ -228,9 +235,6 @@ class GraphicsProgram3D:
         # Change where the camera is looking based on how much mouse movement
         # there has been since last frame
         if self.mouse_move != (0, 0):
-            self.hand_angle_z  -= (self.mouse_move[0] * SENSITIVITY) * delta_time
-            self.hand_angle_x  -= (self.mouse_move[1] * SENSITIVITY) * delta_time
-            #TODO breyta svo mouse movement noti ekki delta time
             if self.mouse_move[0] < 0:
                 self.view_matrix.rotateY(
                     self.mouse_move[0] * SENSITIVITY * delta_time)
@@ -261,31 +265,17 @@ class GraphicsProgram3D:
         p = (self.m * self.v)
 
         # Change position
-        # self.view_matrix.eye.y += p * delta_time
-
         newpos = Point(self.view_matrix.eye.x, self.view_matrix.eye.y + (delta_time * p), self.view_matrix.eye.z)
-        # print(newpos - self.view_matrix.eye)
         player = self.tree.move({"pos": self.view_matrix.eye, 
                                                 "scale": self.view_matrix.bound, 
                                                 "direction": newpos - self.view_matrix.eye,
                                                 "newpos": newpos})
         self.view_matrix.eye += player["direction"]
-        # print(self.v)
         # Change velocity
-        self.v = self.v - 1
+        self.v = self.v - 13 * delta_time
 
-        if (1,0,1) in player["collision"]:
-            self.inputs["JUMP"] = False
-            # self.v = 0
-        # print(self.v)
-
-        # Hugsanlega skoða það að breyta hvernig annað movement virkar
-        # A meðan player er að hoppa?
-        # TODO hafa annað condition fyrir til að stoppa jump ef player
-        # collide-ar við eitthvað fyrir neðan sig???
-
-        # Stop the jump when it reaches the bottom of the 'curve'
-        if self.v == -VELOCITY - 1:
+        # Stop the jump when it reaches the bottom of the 'curve' or hits something
+        if self.v == -VELOCITY - 1 or (1,0,1) in player["collision"]:
             self.inputs["JUMP"] = False
             self.v = VELOCITY
 
@@ -452,6 +442,8 @@ class GraphicsProgram3D:
                         self.inputs["RIGHT"] = True
                     if event.key == K_SPACE:
                         self.inputs["JUMP"] = True
+                    if event.key == K_g:
+                        self.inputs["G"] = True
                 elif event.type == pygame.KEYUP:
                     if event.key == K_w:
                         self.inputs["W"] = False
