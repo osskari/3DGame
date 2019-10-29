@@ -14,7 +14,8 @@ from Shaders import *
 from Matrices import *
 
 from SETTINGS import *
-from HelperObjects import *
+from HelperObjects import BezierMotion
+from Map import *
 
 from GameObjects.Sky import *
 
@@ -43,9 +44,9 @@ class GraphicsProgram3D:
         self.projection_matrix.set_perspective(pi / 2, 800 / 600, 0.5, 100)
         self.shader.set_projection_matrix(self.projection_matrix.get_matrix())
 
-        self.cube = OptimizedCube()
+        # self.cube = OptimizedCube()
 
-        self.sphere = OptimizedSphere()
+        # self.sphere = OptimizedSphere()
 
         # Timer for bezier curves
         self.timer = 0
@@ -72,10 +73,12 @@ class GraphicsProgram3D:
             Point(15.0, 0.0, 0.0)
         )
 
-        self.tree = Collision()
-        self.tree.add_object(Point(9.0, 5.0, -2.0), (2.0, 2.0, 5.0))
-        self.tree.add_object(Point(-5.0, -0.8, -5.0), (30.0, 0.8, 30.0))
-        self.tree.add_object(Point(9, 5.0, -3.3), (5.0, 7.0, 1.0))
+        self.map = Map()
+
+        # self.tree = Collision()
+        # self.tree.add_object(Point(9.0, 5.0, -2.0), (2.0, 2.0, 5.0))
+        # self.tree.add_object(Point(-5.0, -0.8, -5.0), (30.0, 0.8, 30.0))
+        # self.tree.add_object(Point(9, 5.0, -3.3), (5.0, 7.0, 1.0))
 
         self.cube1 = (Point(9.0, 5.0, -2.0), (2.0, 2.0, 2.0),
                       (1.0, 0.5, 0.0), (1.0, 1.0, 1.0), 13)
@@ -164,42 +167,42 @@ class GraphicsProgram3D:
 
         if self.inputs["W"]:
             newpos = self.view_matrix.slide(0, 0, -10 * delta_time)
-            self.view_matrix.eye += self.tree.move({"pos": self.view_matrix.eye, 
+            self.view_matrix.eye += self.map.tree.move({"pos": self.view_matrix.eye, 
                                                    "scale": self.view_matrix.bound, 
                                                    "direction": newpos - self.view_matrix.eye,
                                                    "newpos": newpos})["direction"]
         if self.inputs["S"]:
             newpos = self.view_matrix.slide(0, 0, 10 * delta_time)
-            self.view_matrix.eye += self.tree.move({"pos": self.view_matrix.eye, 
+            self.view_matrix.eye += self.map.tree.move({"pos": self.view_matrix.eye, 
                                                    "scale": self.view_matrix.bound, 
                                                    "direction": newpos - self.view_matrix.eye,
                                                    "newpos": newpos})["direction"]
         if self.inputs["A"]:
             newpos = self.view_matrix.slide(-10 * delta_time, 0, 0)
-            self.view_matrix.eye += self.tree.move({"pos": self.view_matrix.eye, 
+            self.view_matrix.eye += self.map.tree.move({"pos": self.view_matrix.eye, 
                                                    "scale": self.view_matrix.bound, 
                                                    "direction": newpos - self.view_matrix.eye,
                                                    "newpos": newpos})["direction"]
         if self.inputs["D"]:
             newpos = self.view_matrix.slide(10 * delta_time, 0, 0)
-            self.view_matrix.eye += self.tree.move({"pos": self.view_matrix.eye, 
+            self.view_matrix.eye += self.map.tree.move({"pos": self.view_matrix.eye, 
                                                    "scale": self.view_matrix.bound, 
                                                    "direction": newpos - self.view_matrix.eye,
                                                    "newpos": newpos})["direction"]
         if self.inputs["JUMP"]:
             self.jump(delta_time)
-        if self.inputs["Q"]:
-            self.view_matrix.roll(pi * delta_time)
-        if self.inputs["E"]:
-            self.view_matrix.roll(-pi * delta_time)
-        if self.inputs["UP"]:
-            self.view_matrix.pitch(-pi * delta_time)
-        if self.inputs["DOWN"]:
-            self.view_matrix.pitch(pi * delta_time)
-        if self.inputs["LEFT"]:
-            self.view_matrix.yaw(-pi * delta_time)
-        if self.inputs["RIGHT"]:
-            self.view_matrix.yaw(pi * delta_time)
+        # if self.inputs["Q"]:
+        #     self.view_matrix.roll(pi * delta_time)
+        # if self.inputs["E"]:
+        #     self.view_matrix.roll(-pi * delta_time)
+        # if self.inputs["UP"]:
+        #     self.view_matrix.pitch(-pi * delta_time)
+        # if self.inputs["DOWN"]:
+        #     self.view_matrix.pitch(pi * delta_time)
+        # if self.inputs["LEFT"]:
+        #     self.view_matrix.yaw(-pi * delta_time)
+        # if self.inputs["RIGHT"]:
+        #     self.view_matrix.yaw(pi * delta_time)
 
 
         if self.sun.bezier_done(self.timer):
@@ -211,14 +214,18 @@ class GraphicsProgram3D:
         self.mouse_angle_x  = 0
         self.mouse_angle_y  = 0
 
+    # Creates a downwards acceleration
     def gravity(self, delta_time):
+        # Increase the downward momentum
         self.gv += -0.2 * delta_time
+        # Move to the gravity with respect to collision
         newpos = Point(self.view_matrix.eye.x, self.view_matrix.eye.y + self.gv, self.view_matrix.eye.z)
-        player = self.tree.move({"pos": self.view_matrix.eye, 
+        player = self.map.tree.move({"pos": self.view_matrix.eye, 
                                                 "scale": self.view_matrix.bound, 
                                                 "direction": newpos - self.view_matrix.eye,
                                                 "newpos": newpos})
         self.view_matrix.eye += player["direction"]
+        # Reset the downwards velocity when player lands on an object
         if (1,0,1) in player["collision"]:
             self.gv = 0
 
@@ -266,7 +273,7 @@ class GraphicsProgram3D:
 
         # Change position
         newpos = Point(self.view_matrix.eye.x, self.view_matrix.eye.y + (delta_time * p), self.view_matrix.eye.z)
-        player = self.tree.move({"pos": self.view_matrix.eye, 
+        player = self.map.tree.move({"pos": self.view_matrix.eye, 
                                                 "scale": self.view_matrix.bound, 
                                                 "direction": newpos - self.view_matrix.eye,
                                                 "newpos": newpos})
@@ -309,38 +316,39 @@ class GraphicsProgram3D:
         self.shader.set_using_specular_texture(0.0)
 
         ################ DRAW #################
+        self.map.draw(self.shader, self.model_matrix)
 
-        self.shader.set_material_diffuse(1.0, 0.5, 0.0)
-        self.model_matrix.push_matrix()
-        self.model_matrix.add_translation(9.0, 5.0, -2.0)
-        self.model_matrix.add_scale(2.0, 2.0, 5.0)
-        self.shader.set_model_matrix(self.model_matrix.matrix)
-        self.cube.draw(self.shader)
-        self.model_matrix.pop_matrix()
+        # self.shader.set_material_diffuse(1.0, 0.5, 0.0)
+        # self.model_matrix.push_matrix()
+        # self.model_matrix.add_translation(9.0, 5.0, -2.0)
+        # self.model_matrix.add_scale(2.0, 2.0, 5.0)
+        # self.shader.set_model_matrix(self.model_matrix.matrix)
+        # self.cube.draw(self.shader)
+        # self.model_matrix.pop_matrix()
 
-        self.shader.set_material_diffuse(1.0, 0.5, 0.0)
-        self.model_matrix.push_matrix()
-        self.model_matrix.add_translation(9, 5.0, -3.3)
-        self.model_matrix.add_scale(5.0, 7.0, 1.0)
-        self.shader.set_model_matrix(self.model_matrix.matrix)
-        self.cube.draw(self.shader)
-        self.model_matrix.pop_matrix()
+        # self.shader.set_material_diffuse(1.0, 0.5, 0.0)
+        # self.model_matrix.push_matrix()
+        # self.model_matrix.add_translation(9, 5.0, -3.3)
+        # self.model_matrix.add_scale(5.0, 7.0, 1.0)
+        # self.shader.set_model_matrix(self.model_matrix.matrix)
+        # self.cube.draw(self.shader)
+        # self.model_matrix.pop_matrix()
 
-        # Small cube
-        self.shader.set_using_texture(1.0)
+        # # Small cube
+        # self.shader.set_using_texture(1.0)
 
-        self.shader.set_diffuse_texture(0)
-        self.model_matrix.push_matrix()
-        self.shader.set_material_diffuse(0.5, 0.5, 0.5)
-        self.model_matrix.add_translation(0.5, 0.5, 0.5)
-        self.model_matrix.add_scale(0.5, 0.5, 0.5)
-        self.shader.set_model_matrix(self.model_matrix.matrix)
-        self.cube.draw(self.shader)
-        self.model_matrix.pop_matrix()
+        # self.shader.set_diffuse_texture(0)
+        # self.model_matrix.push_matrix()
+        # self.shader.set_material_diffuse(0.5, 0.5, 0.5)
+        # self.model_matrix.add_translation(0.5, 0.5, 0.5)
+        # self.model_matrix.add_scale(0.5, 0.5, 0.5)
+        # self.shader.set_model_matrix(self.model_matrix.matrix)
+        # self.cube.draw(self.shader)
+        # self.model_matrix.pop_matrix()
 
-        self.shader.set_diffuse_texture(1)
+        # self.shader.set_diffuse_texture(1)
 
-        self.shader.set_using_texture(0.0)
+        # self.shader.set_using_texture(0.0)
         # Player hand
         '''
         self.model_matrix.push_matrix()
@@ -355,34 +363,34 @@ class GraphicsProgram3D:
         self.model_matrix.pop_matrix()
         '''
 
-        self.shader.set_material_diffuse(1.0, 1.0, 1.0)
-        self.model_matrix.push_matrix()
-        self.model_matrix.add_translation(-5.0, -0.8, -5.0)
-        self.model_matrix.add_scale(10.0, 0.8, 10.0)
-        self.shader.set_model_matrix(self.model_matrix.matrix)
-        #self.cube.draw(self.shader)
-        self.model_matrix.pop_matrix()
+        # self.shader.set_material_diffuse(1.0, 1.0, 1.0)
+        # self.model_matrix.push_matrix()
+        # self.model_matrix.add_translation(-5.0, -0.8, -5.0)
+        # self.model_matrix.add_scale(10.0, 0.8, 10.0)
+        # self.shader.set_model_matrix(self.model_matrix.matrix)
+        # #self.cube.draw(self.shader)
+        # self.model_matrix.pop_matrix()
 
-        ######## Drawing spheres #########
-        # Sun
-        self.shader.set_using_texture(1.0)
-        self.shader.set_diffuse_texture(self.sun.texture)
-        self.shader.set_material_diffuse(*self.sun.diffuse)
-        self.model_matrix.push_matrix()
-        self.model_matrix.add_translation(*self.sun.get_position(self.timer))
-        self.model_matrix.add_scale(5.0, 5.0, 5.0)
-        self.shader.set_model_matrix(self.model_matrix.matrix)
-        self.sphere.draw(self.shader)
-        self.model_matrix.pop_matrix()
-        # Moon
-        self.shader.set_diffuse_texture(self.moon.texture)
-        self.shader.set_material_diffuse(*self.moon.diffuse)
-        self.model_matrix.push_matrix()
-        self.model_matrix.add_translation(*self.moon.get_position(self.timer))
-        self.model_matrix.add_scale(5.0, 5.0, 5.0)
-        self.shader.set_model_matrix(self.model_matrix.matrix)
-        self.sphere.draw(self.shader)
-        self.model_matrix.pop_matrix()
+        # ######## Drawing spheres #########
+        # # Sun
+        # self.shader.set_using_texture(1.0)
+        # self.shader.set_diffuse_texture(self.sun.texture)
+        # self.shader.set_material_diffuse(*self.sun.diffuse)
+        # self.model_matrix.push_matrix()
+        # self.model_matrix.add_translation(*self.sun.get_position(self.timer))
+        # self.model_matrix.add_scale(5.0, 5.0, 5.0)
+        # self.shader.set_model_matrix(self.model_matrix.matrix)
+        # self.sphere.draw(self.shader)
+        # self.model_matrix.pop_matrix()
+        # # Moon
+        # self.shader.set_diffuse_texture(self.moon.texture)
+        # self.shader.set_material_diffuse(*self.moon.diffuse)
+        # self.model_matrix.push_matrix()
+        # self.model_matrix.add_translation(*self.moon.get_position(self.timer))
+        # self.model_matrix.add_scale(5.0, 5.0, 5.0)
+        # self.shader.set_model_matrix(self.model_matrix.matrix)
+        # self.sphere.draw(self.shader)
+        # self.model_matrix.pop_matrix()
 
         #self.render_map()
 

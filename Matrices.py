@@ -115,7 +115,7 @@ class ViewMatrix:
         self.u = Vector(1, 0, 0)
         self.v = Vector(0, 1, 0)
         self.n = Vector(0, 0, 1)
-        self.bound = (0.2, 0.2, 0.2)
+        self.bound = (0.0, 3, 0.0)
 
     def look(self, eye, center, up):
         self.eye = eye

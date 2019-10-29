@@ -4,8 +4,11 @@ from Base3DObjects import Point, Vector
 
 # Object that helps with collision detection using the AABBTree object
 class Collision:
-    def __init__(self):
+    def __init__(self, objects=None):
         self.tree = AABBTree()
+        if objects:
+            for item in objects:
+                self.add_object(item["pos"], item["scale"])
 
     # Returns AABB object with coorect values based on a point and offset
     def get_aabb(self, point, bound):
@@ -21,6 +24,7 @@ class Collision:
 
     # Makes checking for collision on point easier
     def point_collision(self, point, bound):
+        print(point, bound)
         return self.tree.does_overlap(self.get_aabb(point, bound))
 
     # Returns the point object of collided objects
@@ -40,6 +44,7 @@ class Collision:
                 1 if self.is_between(player, obj, 1) else 0,
                 1 if self.is_between(player, obj, 2) else 0)
 
+    # Returns surface vector based on player direction
     def get_surface_vector(self, player, obj):
         directions = self.get_colliding_face(player, obj)
         # Returns a normalized vector that represents the direction of the surface
@@ -53,12 +58,12 @@ class Collision:
 
     # Returns motion vector of player
     def move(self, player):
-        # If no collision return direction directly
+        # collision member set to advoid key error
+        player["collision"] = []
+        # If no collision return player directly
         if(not self.point_collision(player["newpos"], player["scale"])):
-            player["collision"] = []
             return player
         else:
-            player["collision"] = []
             # If collision, get slide vector for each object collided with
             for item in self.collision_objects(player["newpos"], player["scale"]):
                 player["direction"] = self.get_slide_vector(player, item)
