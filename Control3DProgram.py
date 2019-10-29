@@ -165,13 +165,13 @@ class GraphicsProgram3D:
             self.gravity(delta_time)
 
         if self.inputs["W"]:
-            newpos = self.view_matrix.slide(0, 0, -10 * delta_time)
+            newpos = self.view_matrix.walk(0, 0, -10 * delta_time)
             self.view_matrix.eye += self.tree.move({"pos": self.view_matrix.eye,
                                                     "scale": self.view_matrix.bound,
                                                     "direction": newpos - self.view_matrix.eye,
                                                     "newpos": newpos})["direction"]
         if self.inputs["S"]:
-            newpos = self.view_matrix.slide(0, 0, 10 * delta_time)
+            newpos = self.view_matrix.walk(0, 0, 10 * delta_time)
             self.view_matrix.eye += self.tree.move({"pos": self.view_matrix.eye,
                                                     "scale": self.view_matrix.bound,
                                                     "direction": newpos - self.view_matrix.eye,
@@ -404,14 +404,13 @@ class GraphicsProgram3D:
         for x in range(10):
             for z in range(10):
                 self.model_matrix.push_matrix()
-                self.model_matrix.add_translation(x * 2, 0, z * 2)
+                self.model_matrix.add_translation(x * 2, -2, z * 2)
                 self.model_matrix.add_scale(1.98, 1.98, 1.98)
                 self.shader.set_model_matrix(self.model_matrix.matrix)
                 self.cube.draw(self.shader)
                 self.model_matrix.pop_matrix()
 
         pygame.display.flip()
-
 
     def program_loop(self):
         exiting = False
