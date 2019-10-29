@@ -167,7 +167,7 @@ class Cube:
         shader.set_normal_attribute(self.normal_array)
         shader.set_uv_attribute(self.uv_array)
 
-    def draw(self):
+    def draw(self, shader):
         glDrawArrays(GL_TRIANGLE_FAN, 0, 4)
         glDrawArrays(GL_TRIANGLE_FAN, 4, 4)
         glDrawArrays(GL_TRIANGLE_FAN, 8, 4)
@@ -256,6 +256,7 @@ class OptimizedCube:
         glBindBuffer(GL_ARRAY_BUFFER, self.vertex_buffer_id)
         glBufferData(GL_ARRAY_BUFFER, numpy.array(vertex_array, dtype="float32"), GL_STATIC_DRAW)
         glBindBuffer(GL_ARRAY_BUFFER, 0)
+        vertex_array = None
 
     def draw(self, shader):
         shader.set_attribute_buffers_with_uv(self.vertex_buffer_id)
