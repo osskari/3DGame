@@ -14,7 +14,7 @@ class CircularObject:
             return self.bezier_motion.get_current_position(time)
 
     def restart_motion(self, time):
-        self.bezier_motion.restart(time, 15)
+        self.bezier_motion.restart(time, 40)
 
     def bezier_done(self, time):
         if time > self.bezier_motion.end_time:

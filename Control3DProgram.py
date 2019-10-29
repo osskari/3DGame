@@ -56,20 +56,20 @@ class GraphicsProgram3D:
 
         self.sunMotion = BezierMotion(
             0,
-            15,
-            Point(-15.0, 0.0, 0.0),
-            Point(-15.0, 15.0, 0.0),
-            Point(15.0, 15.0, 0.0),
-            Point(15.0, 0.0, 0.0)
+            40,
+            Point(-50.0, -30.0, 0.0),
+            Point(-50.0, 30.0, 0.0),
+            Point(50.0, 30.0, 0.0),
+            Point(50.0, -30.0, 0.0)
         )
 
         self.moonMotion = BezierMotion(
-            15,
-            30,
-            Point(-15.0, 0.0, 0.0),
-            Point(-15.0, 15.0, 0.0),
-            Point(15.0, 15.0, 0.0),
-            Point(15.0, 0.0, 0.0)
+            40,
+            80,
+            Point(-50.0, -30.0, 0.0),
+            Point(-50.0, 30.0, 0.0),
+            Point(50.0, 30.0, 0.0),
+            Point(50.0, -30.0, 0.0)
         )
 
         self.tree = Collision()
@@ -205,8 +205,8 @@ class GraphicsProgram3D:
             self.moon.restart_motion(self.sun.bezier_motion.end_time)
 
         self.mouse_look_movement(delta_time)
-        self.mouse_angle_x  = 0
-        self.mouse_angle_y  = 0
+        self.mouse_angle_x = 0
+        self.mouse_angle_y = 0
 
     def mouse_look_movement(self, delta_time):
         """
@@ -221,8 +221,8 @@ class GraphicsProgram3D:
         # Change where the camera is looking based on how much mouse movement
         # there has been since last frame
         if self.mouse_move != (0, 0):
-            self.hand_angle_z  -= (self.mouse_move[0] * SENSITIVITY) * delta_time
-            self.hand_angle_x  -= (self.mouse_move[1] * SENSITIVITY) * delta_time
+            self.hand_angle_z -= (self.mouse_move[0] * SENSITIVITY) * delta_time
+            self.hand_angle_x -= (self.mouse_move[1] * SENSITIVITY) * delta_time
             if self.mouse_move[0] < 0:
                 self.view_matrix.rotateY(
                     (self.mouse_move[0] * SENSITIVITY) * delta_time)
@@ -285,9 +285,9 @@ class GraphicsProgram3D:
         # self.shader.set_light_position(*self.view_matrix.eye)
         self.shader.set_eye_position(*self.view_matrix.eye)
         self.shader.set_light_position(*self.view_matrix.eye)
-        self.shader.set_light_diffuse(1.0, 1.0, 1.0)
-        self.shader.set_light_specular(0.5, 0.5, 0.5)
-        self.shader.set_light_ambient(0.4, 0.4, 0.4)
+        self.shader.set_light_diffuse(0.3, 0.3, 0.3)
+        self.shader.set_light_specular(0.2, 0.2, 0.2)
+        self.shader.set_light_ambient(0.1, 0.1, 0.1)
 
         self.shader.set_sun_position(*self.sun.get_position(self.timer))
         self.shader.set_sun_diffuse(1.0, 1.0, 1.0)
@@ -379,6 +379,21 @@ class GraphicsProgram3D:
         self.shader.set_model_matrix(self.model_matrix.matrix)
         self.sphere.draw(self.shader)
         self.model_matrix.pop_matrix()
+
+        ## Test
+
+        self.shader.set_diffuse_texture(self.moon.texture)
+        self.shader.set_material_diffuse(*self.moon.diffuse)
+        self.cube.set_vertices(self.shader)
+        for x in range(8):
+            for y in range(8):
+                for z in range(8):
+                    self.model_matrix.push_matrix()
+                    self.model_matrix.add_translation(x, y, z)
+                    self.model_matrix.add_scale(0.8, 0.8, 0.8)
+                    self.shader.set_model_matrix(self.model_matrix.matrix)
+                    self.cube.draw(self.shader)
+                    self.model_matrix.pop_matrix()
 
         pygame.display.flip()
 

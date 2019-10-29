@@ -58,10 +58,10 @@ void main(void)
 	float sun_phong = max(dot(v_normal, v_h_sun) / (n_len * h_sun_len), 0.0);
 
 
-    gl_FragColor = //(u_light_ambient //* u_mat_ambient
-				  u_light_diffuse * mat_diffuse * lambert
+    gl_FragColor = u_light_ambient //* u_mat_ambient
+				 + u_light_diffuse * mat_diffuse * lambert
 				 + u_light_specular * mat_specular * pow(phong, u_mat_shininess)
-				 + u_sun_diffuse * mat_diffuse * sun_lambert
-	 			 + u_sun_specular * mat_specular * pow(sun_phong, u_mat_shininess);
 				 //+ (u_sun_ambient
+				 + u_sun_diffuse * mat_diffuse * sun_lambert
+				 + u_sun_specular * mat_specular * pow(sun_phong, u_mat_shininess);
 }
