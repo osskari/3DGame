@@ -8,10 +8,15 @@ from pygame.locals import *
 import sys
 import time
 
+from aabbtree import AABB, AABBTree
+
 from Shaders import *
 from Matrices import *
 
 from SETTINGS import *
+from HelperObjects import *
+
+from GameObjects.Sky import *
 
 from GameObjects.GameCube import GameCube
 from GameObjects.SandCube import SandCube
@@ -35,15 +40,47 @@ class GraphicsProgram3D:
         self.view_matrix.look(Point(0, 3, 10), Point(0, 0, 0), Vector(0, 1, 0))
 
         self.projection_matrix = ProjectionMatrix()
-        self.projection_matrix.set_perspective(pi/2, 800/600, 0.02, 100)
+        self.projection_matrix.set_perspective(pi / 2, 800 / 600, 0.5, 100)
         self.shader.set_projection_matrix(self.projection_matrix.get_matrix())
 
-        self.cube = Cube()
+        self.cube = OptimizedCube()
 
+        self.sphere = OptimizedSphere()
+
+        # Timer for bezier curves
+        self.timer = 0
         self.clock = pygame.time.Clock()
         self.clock.tick()
 
         self.angle = 0
+
+        self.sunMotion = BezierMotion(
+            0,
+            15,
+            Point(-15.0, 0.0, 0.0),
+            Point(-15.0, 15.0, 0.0),
+            Point(15.0, 15.0, 0.0),
+            Point(15.0, 0.0, 0.0)
+        )
+
+        self.moonMotion = BezierMotion(
+            15,
+            30,
+            Point(-15.0, 0.0, 0.0),
+            Point(-15.0, 15.0, 0.0),
+            Point(15.0, 15.0, 0.0),
+            Point(15.0, 0.0, 0.0)
+        )
+
+        self.tree = Collision()
+        self.tree.add_object(Point(9.0, 5.0, -2.0), (2.0, 2.0, 5.0))
+        self.tree.add_object(Point(-5.0, -0.8, -5.0), (10.0, 0.8, 10.0))
+        self.tree.add_object(Point(9, 5.0, -3.3), (5.0, 7.0, 1.0))
+
+        self.cube1 = (Point(9.0, 5.0, -2.0), (2.0, 2.0, 2.0),
+                      (1.0, 0.5, 0.0), (1.0, 1.0, 1.0), 13)
+        self.cube2 = (Point(-5.0, -0.8, -5.0), (10.0, 0.8, 10.0),
+                      (0.0, 1.0, 0.0), (1.0, 1.0, 1.0), 13)
 
         self.inputs = {
             "W": False,
@@ -59,21 +96,28 @@ class GraphicsProgram3D:
             "JUMP": False
         }
 
-        self.texture_id01_brick = self.load_texture(sys.path[0] + "/textures/bricks.jpg")
-        self.texture_id02_graybrick = self.load_texture(sys.path[0] + "/textures/graybricks.jpg")
+        self.texture_id00_brick = self.load_texture(
+            sys.path[0] + "/textures/bricks.jpg")
+        self.texture_id01_graybrick = self.load_texture(
+            sys.path[0] + "/textures/graybricks.jpg")
+        self.texture_sun = self.load_texture(
+            sys.path[0] + "/textures/2k_sun.jpg")
+        self.texture_moon = self.load_texture(
+            sys.path[0] + "/textures/2k_moon.jpg")
         self.bind_textures()
+
+        self.sun = CircularObject(self.texture_sun, self.sunMotion.get_current_position(0), self.sunMotion)
+        self.moon = CircularObject(self.texture_moon, self.moonMotion.get_current_position(0), self.moonMotion)
 
         # Velocity
         self.v = VELOCITY
         # Mass
         self.m = MASS
 
-        #Initialize variable that tracks how much mouse movement there is each frame
+        # Initialize variable that tracks how much mouse movement there is each frame
         self.mouse_move = (0, 0)
-        #bool to ignore first mouse movement
+        # bool to ignore first mouse movement
         self.first_move = True
-
-
 
         self.white_background = False
 
@@ -89,7 +133,8 @@ class GraphicsProgram3D:
         glBindTexture(GL_TEXTURE_2D, tex_id)
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, tex_width, tex_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, tex_string)
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, tex_width,
+                     tex_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, tex_string)
         return tex_id
 
     def bind_textures(self):
@@ -98,26 +143,48 @@ class GraphicsProgram3D:
         via self.shader.set_diffuse_texture(n)
         """
 
-        glActiveTexture(GL_TEXTURE0)
-        glBindTexture(GL_TEXTURE_2D, self.texture_id01_brick)
         glActiveTexture(GL_TEXTURE1)
-        glBindTexture(GL_TEXTURE_2D, self.texture_id02_graybrick)
+        glBindTexture(GL_TEXTURE_2D, self.texture_id00_brick)
+        glActiveTexture(GL_TEXTURE2)
+        glBindTexture(GL_TEXTURE_2D, self.texture_id01_graybrick)
+        glActiveTexture(GL_TEXTURE3)
+        glBindTexture(GL_TEXTURE_2D, self.texture_sun)
+        glActiveTexture(GL_TEXTURE4)
+        glBindTexture(GL_TEXTURE_2D, self.texture_moon)
 
     def update(self):
         delta_time = self.clock.tick() / 1000.0
-
+        self.timer += delta_time
         self.angle += pi * delta_time
 
         self.jump(delta_time)
 
+        eyebound = (0.2, 0.2, 0.2)
+
         if self.inputs["W"]:
-            self.view_matrix.slide(0, 0, -2 * delta_time)
+            newpos = self.view_matrix.slide(0, 0, -10 * delta_time)
+            self.view_matrix.eye += self.tree.move({"pos": self.view_matrix.eye, 
+                                                   "scale": eyebound, 
+                                                   "direction": newpos - self.view_matrix.eye,
+                                                   "newpos": newpos})
         if self.inputs["S"]:
-            self.view_matrix.slide(0, 0, 2 * delta_time)
+            newpos = self.view_matrix.slide(0, 0, 10 * delta_time)
+            self.view_matrix.eye += self.tree.move({"pos": self.view_matrix.eye, 
+                                                   "scale": eyebound, 
+                                                   "direction": newpos - self.view_matrix.eye,
+                                                   "newpos": newpos})
         if self.inputs["A"]:
-            self.view_matrix.slide(-2 * delta_time, 0, 0)
+            newpos = self.view_matrix.slide(-10 * delta_time, 0, 0)
+            self.view_matrix.eye += self.tree.move({"pos": self.view_matrix.eye, 
+                                                   "scale": eyebound, 
+                                                   "direction": newpos - self.view_matrix.eye,
+                                                   "newpos": newpos})
         if self.inputs["D"]:
-            self.view_matrix.slide(2 * delta_time, 0, 0)
+            newpos = self.view_matrix.slide(10 * delta_time, 0, 0)
+            self.view_matrix.eye += self.tree.move({"pos": self.view_matrix.eye, 
+                                                   "scale": eyebound, 
+                                                   "direction": newpos - self.view_matrix.eye,
+                                                   "newpos": newpos})
         if self.inputs["Q"]:
             self.view_matrix.roll(pi * delta_time)
         if self.inputs["E"]:
@@ -131,6 +198,12 @@ class GraphicsProgram3D:
         if self.inputs["RIGHT"]:
             self.view_matrix.yaw(pi * delta_time)
 
+
+        if self.sun.bezier_done(self.timer):
+            self.sun.restart_motion(self.moon.bezier_motion.end_time)
+        if self.moon.bezier_done(self.timer):
+            self.moon.restart_motion(self.sun.bezier_motion.end_time)
+
         self.mouse_look_movement(delta_time)
         self.mouse_angle_x  = 0
         self.mouse_angle_y  = 0
@@ -141,8 +214,8 @@ class GraphicsProgram3D:
         param delta_time: Elapsed time since last frame
         """
 
-        #TODO SENSITIVITY constant er 0.1, revisit til að finna rétta sensið
-        #TODO rotateY og pitch virka ekki eins, hugsanlega hafa sitthvoran constant
+        # TODO SENSITIVITY constant er 0.1, revisit til að finna rétta sensið
+        # TODO rotateY og pitch virka ekki eins, hugsanlega hafa sitthvoran constant
         # ef að það er mikill munur á mouse movement upp/niður vs vinstri/hægri
 
         # Change where the camera is looking based on how much mouse movement
@@ -151,17 +224,21 @@ class GraphicsProgram3D:
             self.hand_angle_z  -= (self.mouse_move[0] * SENSITIVITY) * delta_time
             self.hand_angle_x  -= (self.mouse_move[1] * SENSITIVITY) * delta_time
             if self.mouse_move[0] < 0:
-                self.view_matrix.rotateY((self.mouse_move[0] * SENSITIVITY) * delta_time)
+                self.view_matrix.rotateY(
+                    (self.mouse_move[0] * SENSITIVITY) * delta_time)
             elif self.mouse_move[0] > 0:
-                self.view_matrix.rotateY((self.mouse_move[0] * SENSITIVITY) * delta_time)
+                self.view_matrix.rotateY(
+                    (self.mouse_move[0] * SENSITIVITY) * delta_time)
             if self.mouse_move[1] < 0:
                 # Make sure the player can not look further than straight up
                 if self.view_matrix.n.y > -0.99:
-                    self.view_matrix.pitch((self.mouse_move[1] * SENSITIVITY) * delta_time)
+                    self.view_matrix.pitch(
+                        (self.mouse_move[1] * SENSITIVITY) * delta_time)
             elif self.mouse_move[1] > 0:
                 # Make sure the player can not look further than straight down
                 if self.view_matrix.n.y < 0.99:
-                    self.view_matrix.pitch((self.mouse_move[1] * SENSITIVITY) * delta_time)
+                    self.view_matrix.pitch(
+                        (self.mouse_move[1] * SENSITIVITY) * delta_time)
         # Reset to avoid camera pan
         self.mouse_move = (0, 0)
 
@@ -184,14 +261,14 @@ class GraphicsProgram3D:
 
             # Hugsanlega skoða það að breyta hvernig annað movement virkar
             # A meðan player er að hoppa?
-            #TODO hafa annað condition fyrir til að stoppa jump ef player
-            #collide-ar við eitthvað fyrir neðan sig???
+            # TODO hafa annað condition fyrir til að stoppa jump ef player
+            # collide-ar við eitthvað fyrir neðan sig???
 
             # Stop the jump when it reaches the bottom of the 'curve'
             if self.v == -VELOCITY - 1:
                 self.inputs["JUMP"] = False
                 self.v = VELOCITY
-  
+
     def display(self):
         glEnable(GL_DEPTH_TEST)
 
@@ -217,27 +294,39 @@ class GraphicsProgram3D:
 
         self.model_matrix.load_identity()
 
-        self.cube.set_vertices(self.shader)
+        # Not using texture by default
+        self.shader.set_using_texture(0.0)
+        self.shader.set_using_specular_texture(0.0)
 
-        self.shader.set_material_diffuse(1.0, 0.0, 0.0)
+        ################ DRAW #################
+
+        self.shader.set_material_diffuse(1.0, 0.5, 0.0)
         self.model_matrix.push_matrix()
         self.model_matrix.add_translation(9.0, 5.0, -2.0)
-        self.model_matrix.add_scale(2.0, 2.0, 2.0)
+        self.model_matrix.add_scale(2.0, 2.0, 5.0)
         self.shader.set_model_matrix(self.model_matrix.matrix)
-        self.cube.draw()
+        self.cube.draw(self.shader)
+        self.model_matrix.pop_matrix()
+
+        self.shader.set_material_diffuse(1.0, 0.5, 0.0)
+        self.model_matrix.push_matrix()
+        self.model_matrix.add_translation(9, 5.0, -3.3)
+        self.model_matrix.add_scale(5.0, 7.0, 1.0)
+        self.shader.set_model_matrix(self.model_matrix.matrix)
+        self.cube.draw(self.shader)
         self.model_matrix.pop_matrix()
 
         # Small cube
         self.shader.set_using_texture(1.0)
 
-        self.shader.set_diffuse_texture(0) 
+        self.shader.set_diffuse_texture(0)
 
         self.model_matrix.push_matrix()
         self.shader.set_material_diffuse(0.5, 0.5, 0.5)
-        self.model_matrix.add_translation(0, 0, 0)
-        self.model_matrix.add_scale(0.2, 0.2, 0.2)
+        self.model_matrix.add_translation(0.5, 0.5, 0.5)
+        self.model_matrix.add_scale(0.5, 0.5, 0.5)
         self.shader.set_model_matrix(self.model_matrix.matrix)
-        self.cube.draw()
+        self.cube.draw(self.shader)
         self.model_matrix.pop_matrix()
 
         self.shader.set_diffuse_texture(1)
@@ -253,7 +342,7 @@ class GraphicsProgram3D:
         self.model_matrix.add_z_rotation(self.hand_angle_z)
         self.model_matrix.add_scale(0.02, 0.1, 0.05)
         self.shader.set_model_matrix(self.model_matrix.matrix)
-        self.cube.draw()
+        self.cube.draw(self.shader)
         self.model_matrix.pop_matrix()
         '''
 
@@ -262,7 +351,28 @@ class GraphicsProgram3D:
         self.model_matrix.add_translation(-5.0, -0.8, -5.0)
         self.model_matrix.add_scale(10.0, 0.8, 10.0)
         self.shader.set_model_matrix(self.model_matrix.matrix)
-        self.cube.draw()
+        self.cube.draw(self.shader)
+        self.model_matrix.pop_matrix()
+
+        ######## Drawing spheres #########
+        # Sun
+        self.shader.set_using_texture(1.0)
+        self.shader.set_diffuse_texture(self.sun.texture)
+        self.shader.set_material_diffuse(*self.sun.diffuse)
+        self.model_matrix.push_matrix()
+        self.model_matrix.add_translation(*self.sun.get_position(self.timer))
+        self.model_matrix.add_scale(5.0, 5.0, 5.0)
+        self.shader.set_model_matrix(self.model_matrix.matrix)
+        self.sphere.draw(self.shader)
+        self.model_matrix.pop_matrix()
+        # Moon
+        self.shader.set_diffuse_texture(self.moon.texture)
+        self.shader.set_material_diffuse(*self.moon.diffuse)
+        self.model_matrix.push_matrix()
+        self.model_matrix.add_translation(*self.moon.get_position(self.timer))
+        self.model_matrix.add_scale(5.0, 5.0, 5.0)
+        self.shader.set_model_matrix(self.model_matrix.matrix)
+        self.sphere.draw(self.shader)
         self.model_matrix.pop_matrix()
 
         pygame.display.flip()

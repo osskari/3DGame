@@ -1,7 +1,10 @@
 from OpenGL.GL import *
+import OpenGL.GLU
 from math import *  # trigonometry
 
 import sys
+
+import numpy
 
 from Base3DObjects import *
 
@@ -64,6 +67,7 @@ class Shader3D:
         self.specularTextureLoc = glGetUniformLocation(self.renderingProgramID, "u_tex02")
 
         self.usingTextureLoc = glGetUniformLocation(self.renderingProgramID, "u_using_texture")
+        self.usingSpecularTextureLoc = glGetUniformLocation(self.renderingProgramID, "u_using_specular_texture")
 
     def use(self):
         try:
@@ -113,6 +117,7 @@ class Shader3D:
     def set_material_shininess(self, shininess):
         glUniform1f(self.materialShininessLoc, shininess)
 
+
     def set_attribute_buffers_with_uv(self, vertex_buffer_id):
         glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer_id)
         glVertexAttribPointer(self.positionLoc, 3, GL_FLOAT, False, 8 * sizeof(GLfloat), OpenGL.GLU.ctypes.c_void_p(0))
@@ -125,8 +130,14 @@ class Shader3D:
     def set_using_texture(self, n):
         glUniform1f(self.usingTextureLoc, n)
 
+    def set_using_specular_texture(self, n):
+        glUniform1f(self.usingSpecularTextureLoc, n)
+
     def set_diffuse_texture(self, n):
         glUniform1i(self.diffuseTextureLoc, n)
+    
+    def set_specular_texture(self, n):
+        glUniform1i(self.specularTextureLoc, n)
 
     def set_uv_attribute(self, vertex_array):
         glVertexAttribPointer(self.uvLoc, 2, GL_FLOAT, False, 0, vertex_array)
