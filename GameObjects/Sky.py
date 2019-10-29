@@ -1,7 +1,7 @@
 class CircularObject:
     def __init__(self, texture_id, position, motion=None):
-        self.diffuse = (1.0, 1.0, 1.0)
-        self.specular = (1.0, 1.0, 1.0)
+        self.diffuse = (0.5, 0.5, 0.5)
+        self.specular = (0.5, 0.5, 0.5)
         self.shininess = 1
         self.texture = texture_id
         self.position = position

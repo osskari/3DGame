@@ -9,11 +9,15 @@ uniform mat4 u_view_matrix;
 uniform mat4 u_projection_matrix;
 
 uniform vec4 u_light_position;
+uniform vec4 u_sun_position;
 uniform vec4 u_eye_position; 
 
 varying vec4 v_normal;
 varying vec4 v_s;
 varying vec4 v_h;
+
+varying vec4 v_s_sun;
+varying vec4 v_h_sun;
 varying vec2 v_uv;
 
 void main(void)

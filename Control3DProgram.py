@@ -278,11 +278,16 @@ class GraphicsProgram3D:
         self.shader.set_eye_position(*self.view_matrix.eye)
         self.shader.set_light_position(*self.view_matrix.eye)
         self.shader.set_light_diffuse(1.0, 1.0, 1.0)
-
         self.shader.set_light_specular(0.5, 0.5, 0.5)
-        self.shader.set_material_specular(0.4, 0.4, 0.4)
         self.shader.set_light_ambient(0.4, 0.4, 0.4)
-        self.shader.set_material_shininess(4)
+
+        self.shader.set_sun_position(*self.sun.get_position(self.timer))
+        self.shader.set_sun_diffuse(1.0, 1.0, 1.0)
+        self.shader.set_sun_specular(0.5, 0.5, 0.5)
+        self.shader.set_sun_ambient(0.4, 0.4, 0.4)
+
+        self.shader.set_material_specular(0.4, 0.4, 0.4)
+        self.shader.set_material_shininess(10)
 
         self.model_matrix.load_identity()
 
@@ -348,7 +353,7 @@ class GraphicsProgram3D:
         self.shader.set_material_diffuse(*self.sun.diffuse)
         self.model_matrix.push_matrix()
         self.model_matrix.add_translation(*self.sun.get_position(self.timer))
-        self.model_matrix.add_scale(5.0, 5.0, 5.0)
+        self.model_matrix.add_scale(0.5, 0.5, 0.5)
         self.shader.set_model_matrix(self.model_matrix.matrix)
         self.sphere.draw(self.shader)
         self.model_matrix.pop_matrix()
@@ -357,7 +362,7 @@ class GraphicsProgram3D:
         self.shader.set_material_diffuse(*self.moon.diffuse)
         self.model_matrix.push_matrix()
         self.model_matrix.add_translation(*self.moon.get_position(self.timer))
-        self.model_matrix.add_scale(5.0, 5.0, 5.0)
+        self.model_matrix.add_scale(0.5, 0.5, 0.5)
         self.shader.set_model_matrix(self.model_matrix.matrix)
         self.sphere.draw(self.shader)
         self.model_matrix.pop_matrix()
