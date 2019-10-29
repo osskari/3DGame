@@ -32,6 +32,9 @@ class GraphicsProgram3D:
         pygame.mouse.set_visible(False)
         pygame.event.set_grab(True)
 
+        self.sky_shader = SkyShader3D()
+        self.sky_shader.use()
+
         self.shader = Shader3D()
         self.shader.use()
 
@@ -47,6 +50,8 @@ class GraphicsProgram3D:
         self.cube = OptimizedCube()
 
         self.sphere = OptimizedSphere()
+
+        self.sky_sphere = SkySphere()
 
         # Timer for bezier curves
         self.timer = 0
@@ -165,13 +170,13 @@ class GraphicsProgram3D:
             self.gravity(delta_time)
 
         if self.inputs["W"]:
-            newpos = self.view_matrix.slide(0, 0, -10 * delta_time)
+            newpos = self.view_matrix.walk(0, 0, -10 * delta_time)
             self.view_matrix.eye += self.tree.move({"pos": self.view_matrix.eye,
                                                     "scale": self.view_matrix.bound,
                                                     "direction": newpos - self.view_matrix.eye,
                                                     "newpos": newpos})["direction"]
         if self.inputs["S"]:
-            newpos = self.view_matrix.slide(0, 0, 10 * delta_time)
+            newpos = self.view_matrix.walk(0, 0, 10 * delta_time)
             self.view_matrix.eye += self.tree.move({"pos": self.view_matrix.eye,
                                                     "scale": self.view_matrix.bound,
                                                     "direction": newpos - self.view_matrix.eye,
@@ -288,8 +293,27 @@ class GraphicsProgram3D:
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
         glViewport(0, 0, 800, 600)
+        self.model_matrix.load_identity()
+
+
+
+        self.sky_shader.use()
+        self.sky_shader.set_diffuse_texture(1)
+        self.sky_shader.set_alpha_texture(None)
+
+        self.sky_shader.set_projection_matrix(self.projection_matrix.get_matrix())
+        self.sky_shader.set_view_matrix(self.view_matrix.get_matrix())
+        self.model_matrix.push_matrix()
+        self.model_matrix.add_translation(self.view_matrix.eye.x, self.view_matrix.eye.y, self.view_matrix.eye.z)
+        self.sky_shader.set_model_matrix(self.model_matrix.matrix)
+        self.sky_sphere.draw(self.sky_shader)
+
+        self.model_matrix.push_matrix()
+
+        self.shader.use()
 
         self.shader.set_view_matrix(self.view_matrix.get_matrix())
+        self.shader.set_projection_matrix(self.projection_matrix.get_matrix())
 
         # self.shader.set_light_position(*self.view_matrix.eye)
         self.shader.set_eye_position(*self.view_matrix.eye)
@@ -312,7 +336,6 @@ class GraphicsProgram3D:
         self.shader.set_material_specular(0.4, 0.4, 0.4)
         self.shader.set_material_shininess(10)
 
-        self.model_matrix.load_identity()
 
         # Not using texture by default
         self.shader.set_using_texture(0.0)
@@ -351,19 +374,6 @@ class GraphicsProgram3D:
         self.shader.set_diffuse_texture(1)
 
         self.shader.set_using_texture(0.0)
-        # Player hand
-        '''
-        self.model_matrix.push_matrix()
-        self.shader.set_material_diffuse(1.0, 1.0, 1.0)
-        self.model_matrix.add_translation(self.view_matrix.eye.x + 0.0397, self.view_matrix.eye.y - 0.0622, self.view_matrix.eye.z - 0.0384)
-        self.model_matrix.add_x_rotation(self.hand_angle_x)
-        self.model_matrix.add_y_rotation(-0.4)
-        self.model_matrix.add_z_rotation(self.hand_angle_z)
-        self.model_matrix.add_scale(0.02, 0.1, 0.05)
-        self.shader.set_model_matrix(self.model_matrix.matrix)
-        self.cube.draw(self.shader)
-        self.model_matrix.pop_matrix()
-        '''
 
         self.shader.set_material_diffuse(1.0, 1.0, 1.0)
         self.model_matrix.push_matrix()
@@ -409,6 +419,9 @@ class GraphicsProgram3D:
                 self.shader.set_model_matrix(self.model_matrix.matrix)
                 self.cube.draw(self.shader)
                 self.model_matrix.pop_matrix()
+        #self.sky_shader.set_model_matrix etc
+
+
 
         pygame.display.flip()
 
