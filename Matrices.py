@@ -115,7 +115,7 @@ class ViewMatrix:
         self.u = Vector(1, 0, 0)
         self.v = Vector(0, 1, 0)
         self.n = Vector(0, 0, 1)
-        self.bound = (0.2, 0.2, 0.2)
+        self.bound = (0.3, 3, 0.3)
 
     def look(self, eye, center, up):
         self.eye = eye
@@ -130,7 +130,6 @@ class ViewMatrix:
         self.eye.x -= del_n * vec.x
         self.eye.z -= del_n * vec.z
         return self.eye
-
 
     def slide(self, del_u, del_v, del_n):
         return self.eye + self.u * del_u + self.v * del_v + self.n * del_n
@@ -158,7 +157,6 @@ class ViewMatrix:
         tmp_u = self.u * c + self.n * s
         self.n = self.u * -s + self.n * c
         self.u = tmp_u
-
 
     def rotateY(self, angle):
         """
