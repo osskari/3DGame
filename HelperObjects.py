@@ -12,9 +12,9 @@ class Collision:
 
     # Returns AABB object with coorect values based on a point and offset
     def get_aabb(self, point, bound):
-        return AABB([(point.x - bound[0], point.x + bound[0]),
-                     (point.y - bound[1], point.y + bound[1]),
-                     (point.z - bound[2], point.z + bound[2])])
+        return AABB([(point.x - bound[0]/2, point.x + bound[0]/2),
+                     (point.y - bound[1]/2, point.y + bound[1]/2),
+                     (point.z - bound[2]/2, point.z + bound[2]/2)])
 
     # Add object with position and scale to the tree
     # Sets the position as the value returned in case of collision
