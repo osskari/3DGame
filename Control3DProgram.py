@@ -57,6 +57,23 @@ class GraphicsProgram3D:
 
         self.angle = 0
 
+        self.inputs = {
+            "W": False,
+            "A": False,
+            "S": False,
+            "D": False,
+            "UP": False,
+            "DOWN": False,
+            "LEFT": False,
+            "RIGHT": False,
+            "Q": False,
+            "E": False,
+            "JUMP": False,
+            "G": False,
+            "CLICK": False
+        }
+
+
         self.sunMotion = BezierMotion(
             -30,
             30,
@@ -79,33 +96,6 @@ class GraphicsProgram3D:
             Point(-50.0, -30.0, 0.0)
         )
 
-        self.map = Map()
-
-        # self.tree = Collision()
-        # self.tree.add_object(Point(9.0, 5.0, -2.0), (2.0, 2.0, 5.0))
-        # self.tree.add_object(Point(-5.0, -0.8, -5.0), (30.0, 0.8, 30.0))
-        # self.tree.add_object(Point(9, 5.0, -3.3), (5.0, 7.0, 1.0))
-
-        self.cube1 = (Point(9.0, 5.0, -2.0), (2.0, 2.0, 2.0),
-                      (1.0, 0.5, 0.0), (1.0, 1.0, 1.0), 13)
-        self.cube2 = (Point(-5.0, -0.8, -5.0), (10.0, 0.8, 10.0),
-                      (0.0, 1.0, 0.0), (1.0, 1.0, 1.0), 13)
-
-        self.inputs = {
-            "W": False,
-            "A": False,
-            "S": False,
-            "D": False,
-            "UP": False,
-            "DOWN": False,
-            "LEFT": False,
-            "RIGHT": False,
-            "Q": False,
-            "E": False,
-            "JUMP": False,
-            "G": False,
-            "CLICK": False
-        }
 
         self.texture_id00_brick = self.load_texture(
             sys.path[0] + "/textures/bricks.jpg")
@@ -119,6 +109,9 @@ class GraphicsProgram3D:
 
         self.sun = CircularObject(self.texture_sun, self.sunMotion.get_current_position(0), self.sunMotion)
         self.moon = CircularObject(self.texture_moon, self.moonMotion.get_current_position(0), self.moonMotion)
+
+        self.map = Map({"texture": self.texture_sun, "currentpos": self.sunMotion.get_current_position(0), "motion": self.sunMotion}, 
+                       {"texture": self.texture_moon, "currentpos": self.moonMotion.get_current_position(0), "motion": self.moonMotion})
 
         # Velocity
         self.v = VELOCITY
@@ -202,8 +195,8 @@ class GraphicsProgram3D:
         if self.inputs["JUMP"]:
             self.jump(delta_time)
 
-        self.sun.bezier_done(self.timer)
-        self.moon.bezier_done(self.timer)
+        self.map.sun.bezier_done(self.timer)
+        self.map.moon.bezier_done(self.timer)
 
         self.mouse_look_movement(delta_time)
         self.mouse_angle_x = 0
@@ -301,10 +294,6 @@ class GraphicsProgram3D:
         self.shader.set_light_specular(0.2, 0.2, 0.2)
         self.shader.set_light_ambient(0.1, 0.1, 0.1)
 
-        
-
-        self.draw_orbiting_objects()
-
         self.shader.set_material_specular(0.4, 0.4, 0.4)
         self.shader.set_material_shininess(10)
 
@@ -315,7 +304,7 @@ class GraphicsProgram3D:
         self.shader.set_using_specular_texture(0.0)
 
         ################ DRAW #################
-        self.map.draw(self.shader, self.model_matrix)
+        self.map.draw(self.shader, self.model_matrix, self.timer)
 
         # self.shader.set_material_diffuse(1.0, 0.5, 0.0)
         # self.model_matrix.push_matrix()
@@ -394,45 +383,6 @@ class GraphicsProgram3D:
         #         self.model_matrix.pop_matrix()
 
         pygame.display.flip()
-
-    def draw_orbiting_objects(self):
-        ######## Setting their lights #########
-        # Sun
-        self.shader.set_sun_position(*self.sun.get_position(self.timer))
-        self.shader.set_sun_diffuse(0.6, 0.6, 0.6)
-        self.shader.set_sun_specular(0.5, 0.5, 0.5)
-        self.shader.set_sun_ambient(0.4, 0.4, 0.4)
-
-        # Moon
-        self.shader.set_moon_position(*self.moon.get_position(self.timer))
-        self.shader.set_moon_diffuse(0x7d / 256, 0x7f / 256, 0x83 / 256)
-        self.shader.set_moon_specular(0x7d / 256, 0x7f / 256, 0x83 / 256)
-        self.shader.set_moon_ambient(0x7d / 256, 0x7f / 256, 0x83 / 256)
-
-        ######## Drawing spheres #########
-        self.shader.set_using_texture(1.0)
-        # Sun
-        self.shader.set_diffuse_texture(self.sun.texture)
-        self.shader.set_material_diffuse(*self.sun.diffuse)
-        self.model_matrix.push_matrix()
-        self.model_matrix.add_translation(*self.sun.get_position(self.timer))
-        self.model_matrix.add_scale(2.5, 2.5, 2.5)
-        self.shader.set_model_matrix(self.model_matrix.matrix)
-        self.sphere.draw(self.shader)
-        self.model_matrix.pop_matrix()
-
-        # Moon
-        self.shader.set_diffuse_texture(self.moon.texture)
-        self.shader.set_material_diffuse(*self.moon.diffuse)
-        self.model_matrix.push_matrix()
-        self.model_matrix.add_translation(*self.moon.get_position(self.timer))
-        self.model_matrix.add_scale(2.5, 2.5, 2.5)
-        self.shader.set_model_matrix(self.model_matrix.matrix)
-        self.sphere.draw(self.shader)
-        self.model_matrix.pop_matrix()
-
-        self.shader.set_using_texture(0.0)
-        self.shader.set_using_specular_texture(0.0)
 
     def program_loop(self):
         exiting = False
