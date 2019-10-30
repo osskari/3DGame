@@ -169,7 +169,8 @@ class GraphicsProgram3D:
         self.timer += delta_time
         self.angle += pi * delta_time
 
-
+        # Delay 'start' of gravity to advoid instaclipping on launch
+        # self.jump() has it's own gravity, so disable this when a jump is occuring
         if self.timer != 0.0 and not self.inputs["JUMP"]:
             self.gravity(delta_time)
 
