@@ -40,7 +40,7 @@ class GraphicsProgram3D:
         self.model_matrix = ModelMatrix()
 
         self.view_matrix = ViewMatrix()
-        self.view_matrix.look(Point(0, 5, 10), Point(0, 0, 0), Vector(0, 1, 0))
+        self.view_matrix.look(Point(0, 6, 10), Point(0, 0, 0), Vector(0, 1, 0))
 
         self.projection_matrix = ProjectionMatrix()
         self.projection_matrix.set_perspective(pi / 2, 800 / 600, 0.5, 100)
@@ -166,13 +166,14 @@ class GraphicsProgram3D:
     def update(self):
         delta_time = self.clock.tick() / 1000.0
 
-        self.timer += delta_time
-        self.angle += pi * delta_time
-
         # Delay 'start' of gravity to advoid instaclipping on launch
         # self.jump() has it's own gravity, so disable this when a jump is occuring
         if self.timer != 0.0 and not self.inputs["JUMP"]:
             self.gravity(delta_time)
+
+        self.timer += delta_time
+        self.angle += pi * delta_time
+
 
         if self.inputs["W"]:
             newpos = self.view_matrix.walk(0, 0, -10 * delta_time)

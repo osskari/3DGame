@@ -8,18 +8,20 @@ class Collision:
         self.tree = AABBTree()
         if objects:
             for item in objects:
-                self.add_object(item["pos"], item["scale"])
+                if item["type"] == "CUBE":
+                    self.add_object(item["pos"], (item["scale"][0]/2, item["scale"][1]/2, item["scale"][2]/2))
+                elif item["type"] == "SPHERE":
+                    self.add_object(item["pos"], item["scale"])
 
     # Returns AABB object with coorect values based on a point and offset
     def get_aabb(self, point, bound):
-        return AABB([(point.x - bound[0]/2, point.x + bound[0]/2),
-                     (point.y - bound[1]/2, point.y + bound[1]/2),
-                     (point.z - bound[2]/2, point.z + bound[2]/2)])
+        return AABB([(point.x - bound[0], point.x + bound[0]),
+                     (point.y - bound[1], point.y + bound[1]),
+                     (point.z - bound[2], point.z + bound[2])])
 
     # Add object with position and scale to the tree
     # Sets the position as the value returned in case of collision
     def add_object(self, position, scale):
-        print(self.get_aabb(position, scale))
         self.tree.add(self.get_aabb(position, scale),
                       {"pos": position, "scale": scale})
 
@@ -31,7 +33,7 @@ class Collision:
     def collision_objects(self, point, bound):
         return self.tree.overlap_values(self.get_aabb(point, bound))
 
-    # checks if player is between bounds of object on an axis with respect to size of both
+    # checks if player is between bounds of object on an axis with respect to size
     def is_between(self, player, obj, axis):
         return obj["pos"][axis] - obj["scale"][axis] < player["pos"][axis] < obj["pos"][axis] + obj["scale"][axis]
 
@@ -63,10 +65,6 @@ class Collision:
             return player
         else:
             # If collision, get slide vector for each object collided with
-            print("player aabb:", player["pos"])
-            a = self.collision_objects(player["newpos"], player["scale"])
-            for i in a:
-                print(self.get_aabb(i["pos"], i["scale"]))
             for item in self.collision_objects(player["newpos"], player["scale"]):
                 player["direction"] = self.get_slide_vector(player, item)
                 player["collision"].append(

@@ -24,7 +24,7 @@ class Map:
                 "texture": None
             },
             {
-                "pos": Point(0, 40, 0),
+                "pos": Point(0, 20, 0),
                 "scale": (2, 2, 2),
                 "diffuse": (1, 1, 1),
                 "specular": (1, 1, 1),
