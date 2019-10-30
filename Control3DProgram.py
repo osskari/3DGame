@@ -130,6 +130,7 @@ class GraphicsProgram3D:
         self.mouse_move = (0, 0)
         # bool to ignore first mouse movement
         self.first_move = True
+        self.can_jump = True
 
         self.white_background = False
 
@@ -178,29 +179,41 @@ class GraphicsProgram3D:
 
 
         if self.inputs["W"]:
-            newpos = self.view_matrix.walk(0, 0, -10 * delta_time)
-            self.view_matrix.eye += self.map.tree.move({"pos": self.view_matrix.eye, 
+            newpos = self.view_matrix.walk(-10 * delta_time)
+            player = self.map.tree.move({"pos": self.view_matrix.eye, 
                                                    "scale": self.view_matrix.bound, 
                                                    "direction": newpos - self.view_matrix.eye,
-                                                   "newpos": newpos})["direction"]
+                                                   "newpos": newpos})
+            self.view_matrix.eye += player["direction"]
+            if self.inputs["JUMP"] and ((1,1,0) in player["collision"] or (0,1,1) in player["collision"]):
+                self.can_jump = True
         if self.inputs["S"]:
-            newpos = self.view_matrix.walk(0, 0, 10 * delta_time)
-            self.view_matrix.eye += self.map.tree.move({"pos": self.view_matrix.eye, 
+            newpos = self.view_matrix.walk(10 * delta_time)
+            player = self.map.tree.move({"pos": self.view_matrix.eye, 
                                                    "scale": self.view_matrix.bound, 
                                                    "direction": newpos - self.view_matrix.eye,
-                                                   "newpos": newpos})["direction"]
+                                                   "newpos": newpos})
+            self.view_matrix.eye += player["direction"]
+            if self.inputs["JUMP"] and ((1,1,0) in player["collision"] or (0,1,1) in player["collision"]):
+                self.can_jump = True
         if self.inputs["A"]:
             newpos = self.view_matrix.slide(-10 * delta_time, 0, 0)
-            self.view_matrix.eye += self.map.tree.move({"pos": self.view_matrix.eye, 
+            player = self.map.tree.move({"pos": self.view_matrix.eye, 
                                                    "scale": self.view_matrix.bound, 
                                                    "direction": newpos - self.view_matrix.eye,
-                                                   "newpos": newpos})["direction"]
+                                                   "newpos": newpos})
+            self.view_matrix.eye += player["direction"]
+            if self.inputs["JUMP"] and ((1,1,0) in player["collision"] or (0,1,1) in player["collision"]):
+                self.can_jump = True
         if self.inputs["D"]:
             newpos = self.view_matrix.slide(10 * delta_time, 0, 0)
-            self.view_matrix.eye += self.map.tree.move({"pos": self.view_matrix.eye, 
+            player = self.map.tree.move({"pos": self.view_matrix.eye, 
                                                    "scale": self.view_matrix.bound, 
                                                    "direction": newpos - self.view_matrix.eye,
-                                                   "newpos": newpos})["direction"]
+                                                   "newpos": newpos})
+            self.view_matrix.eye += player["direction"]
+            if self.inputs["JUMP"] and ((1,1,0) in player["collision"] or (0,1,1) in player["collision"]):
+                self.can_jump = True
         if self.inputs["JUMP"]:
             self.jump(delta_time)
 
@@ -267,7 +280,6 @@ class GraphicsProgram3D:
         """
         # Momentum = mass * velocity
         p = (self.m * self.v)
-
         # Change position
         newpos = Point(self.view_matrix.eye.x, self.view_matrix.eye.y + (delta_time * p), self.view_matrix.eye.z)
         player = self.map.tree.move({"pos": self.view_matrix.eye, 
@@ -277,6 +289,7 @@ class GraphicsProgram3D:
         self.view_matrix.eye += player["direction"]
         # Change velocity
         self.v = self.v - 13 * delta_time
+
 
         # Stop the jump when it reaches the bottom of the 'curve' or hits something
         if self.v == -VELOCITY - 1 or (1,0,1) in player["collision"]:
@@ -320,7 +333,7 @@ class GraphicsProgram3D:
         self.shader.set_light_position(*self.view_matrix.eye)
         self.shader.set_light_diffuse(0.3, 0.3, 0.3)
         self.shader.set_light_specular(0.2, 0.2, 0.2)
-        self.shader.set_light_ambient(0.1, 0.1, 0.1)
+        self.shader.set_global_ambient(0.2, 0.2, 0.2)
 
         self.shader.set_material_specular(0.4, 0.4, 0.4)
         self.shader.set_material_shininess(10)
@@ -367,6 +380,9 @@ class GraphicsProgram3D:
                     if event.key == K_RIGHT:
                         self.inputs["RIGHT"] = True
                     if event.key == K_SPACE:
+                        if self.can_jump:
+                            self.v = VELOCITY
+                            self.can_jump = False
                         self.inputs["JUMP"] = True
                     if event.key == K_g:
                         self.inputs["G"] = True

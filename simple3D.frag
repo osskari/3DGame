@@ -14,7 +14,7 @@ varying vec2 v_uv;
 
 uniform vec4 u_light_diffuse;
 uniform vec4 u_light_specular;
-uniform vec4 u_light_ambient; //Skipta ut fyrir global amb???
+uniform vec4 u_global_ambient;
 
 uniform vec4 u_sun_diffuse;
 uniform vec4 u_sun_specular;
@@ -70,8 +70,8 @@ void main(void)
 	float moon_phong = max(dot(v_normal, v_h_moon) / (n_len * h_moon_len), 0.0);
 
 
-    gl_FragColor = //u_light_ambient //* u_mat_ambient
-				  u_light_diffuse * mat_diffuse * lambert
+    gl_FragColor = u_global_ambient //* u_mat_ambient
+				 + u_light_diffuse * mat_diffuse * lambert
 				 + u_light_specular * mat_specular * pow(phong, u_mat_shininess)
 				 //+ (u_sun_ambient
 				 + u_sun_diffuse * mat_diffuse * sun_lambert

@@ -8,7 +8,7 @@ class Map:
         self.objects = [
             {
                 "pos": Point(0, 0, 0),
-                "scale": (30, 0.5, 30),
+                "scale": (20, 0.5, 20),
                 "diffuse": (1, 1, 1),
                 "specular": (1, 1, 1),
                 "shininess": 13,
@@ -16,41 +16,59 @@ class Map:
                 "texture": 1
             },
             {
-                "pos": Point(20, 10, 0),
-                "scale": (10, 0.5, 10),
+                "pos": Point(10, 10, 0),
+                "scale": (10, 2, 10),
                 "diffuse": (1, 1, 1),
                 "specular": (1, 1, 1),
                 "shininess": 13,
                 "type": "CUBE",
-                "texture": None
+                "texture": 1
             },
             {
                 "pos": Point(-20, 20, 0),
-                "scale": (10, 0.5, 10),
+                "scale": (10, 2, 10),
                 "diffuse": (1, 1, 1),
                 "specular": (1, 1, 1),
                 "shininess": 13,
                 "type": "CUBE",
-                "texture": None
+                "texture": 1
             },
             {
-                "pos": Point(0, 60, 0),
+                "pos": Point(0, 40, 0),
                 "scale": (10, 0.5, 10),
                 "diffuse": (1, 1, 1),
                 "specular": (1, 1, 1),
                 "shininess": 13,
                 "type": "CUBE",
-                "texture": None
+                "texture": 1
             },
             {
-                "pos": Point(0, 50, 0),
+                "pos": Point(0, 59.5, 0),
                 "scale": (10, 0.5, 10),
                 "diffuse": (1, 1, 1),
                 "specular": (1, 1, 1),
                 "shininess": 13,
                 "type": "CUBE",
-                "texture": None
-            }
+                "texture": 1
+            },
+            {
+                "pos": Point(16, 70, 0),
+                "scale": (0.5, 20, 10),
+                "diffuse": (1, 1, 1),
+                "specular": (1, 1, 1),
+                "shininess": 13,
+                "type": "CUBE",
+                "texture": 1
+            },
+            {
+                "pos": Point(35, 55, 0),
+                "scale": (10, 0.5, 10),
+                "diffuse": (1, 1, 1),
+                "specular": (1, 1, 1),
+                "shininess": 13,
+                "type": "CUBE",
+                "texture": 1
+            },
         ]
         self.sun = CircularObject(
             sun["texture"], sun["currentpos"], sun["motion"])

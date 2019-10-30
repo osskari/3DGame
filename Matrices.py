@@ -115,7 +115,7 @@ class ViewMatrix:
         self.u = Vector(1, 0, 0)
         self.v = Vector(0, 1, 0)
         self.n = Vector(0, 0, 1)
-        self.bound = (0.3, 3, 0.3)
+        self.bound = (0.8, 3, 0.8)
 
     def look(self, eye, center, up):
         self.eye = eye
@@ -125,11 +125,9 @@ class ViewMatrix:
         self.u.normalize()
         self.v = self.n.cross(self.u)
 
-    def walk(self, del_u, del_v, del_n):
+    def walk(self, del_n):
         vec = Vector(0, 1, 0).cross(self.u)
-        self.eye.x -= del_n * vec.x
-        self.eye.z -= del_n * vec.z
-        return self.eye
+        return Point(self.eye.x - del_n * vec.x, self.eye.y , self.eye.z - del_n * vec.z)
 
     def slide(self, del_u, del_v, del_n):
         return self.eye + self.u * del_u + self.v * del_v + self.n * del_n

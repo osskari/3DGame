@@ -51,7 +51,7 @@ class Shader3D:
         self.lightPosLoc = glGetUniformLocation(self.renderingProgramID, "u_light_position")
         self.lightDiffuseLoc = glGetUniformLocation(self.renderingProgramID, "u_light_diffuse")
         self.lightSpecularLoc = glGetUniformLocation(self.renderingProgramID, "u_light_specular")
-        self.lightAmbientLoc = glGetUniformLocation(self.renderingProgramID, "u_light_ambient")
+        self.globalAmbientLoc = glGetUniformLocation(self.renderingProgramID, "u_global_ambient")
 
         self.sunPosLoc = glGetUniformLocation(self.renderingProgramID, "u_sun_position")
         self.sunDiffuseLoc = glGetUniformLocation(self.renderingProgramID, "u_sun_diffuse")
@@ -107,8 +107,8 @@ class Shader3D:
     def set_light_diffuse(self, r, g, b):
         glUniform4f(self.lightDiffuseLoc, r, g, b, 1.0)
 
-    def set_light_ambient(self, r, g, b):
-        glUniform4f(self.lightAmbientLoc, r, g, b, 1.0)
+    def set_global_ambient(self, r, g, b):
+        glUniform4f(self.globalAmbientLoc, r, g, b, 1.0)
 
     def set_light_specular(self, r, g, b):
         glUniform4f(self.lightSpecularLoc, r, g, b, 1.0)

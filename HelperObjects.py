@@ -35,7 +35,7 @@ class Collision:
 
     # checks if player is between bounds of object on an axis with respect to size
     def is_between(self, player, obj, axis):
-        return obj["pos"][axis] - obj["scale"][axis] < player["pos"][axis] < obj["pos"][axis] + obj["scale"][axis]
+        return obj["pos"][axis] - obj["scale"][axis] - player["scale"][axis] < player["pos"][axis] < obj["pos"][axis] + obj["scale"][axis] + player["scale"][axis]
 
     # Finds which side of a cube the player is touching
     def get_colliding_face(self, player, obj):
@@ -61,7 +61,7 @@ class Collision:
         # collision member set to advoid key error
         player["collision"] = []
         # If no collision return player directly
-        if(not self.point_collision(player["newpos"], player["scale"])):
+        if not self.point_collision(player["newpos"], player["scale"]):
             return player
         else:
             # If collision, get slide vector for each object collided with
@@ -69,6 +69,7 @@ class Collision:
                 player["direction"] = self.get_slide_vector(player, item)
                 player["collision"].append(
                     self.get_colliding_face(player, item))
+            print(player["collision"])
             return player
 
 
