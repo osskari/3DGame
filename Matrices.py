@@ -141,6 +141,7 @@ class ViewMatrix:
         tmp_u = self.u * c + self.v * s
         self.v = self.u * -s + self.v * c
         self.u = tmp_u
+        return self.eye
 
     def pitch(self, angle):
         c = cos(angle)

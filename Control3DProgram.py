@@ -57,6 +57,7 @@ class GraphicsProgram3D:
 
         # Timer for bezier curves
         self.timer = 0.0
+        self.flip_timer = 0.0
         self.clock = pygame.time.Clock()
         self.clock.tick()
 
@@ -107,6 +108,7 @@ class GraphicsProgram3D:
             "RIGHT": False,
             "Q": False,
             "E": False,
+            "R": False,
             "JUMP": False,
             "G": False,
             "CLICK": False
@@ -141,6 +143,8 @@ class GraphicsProgram3D:
         self.white_background = False
 
         self.projectiles = []
+
+        self.reverse = False
 
     def load_texture(self, path):
         surface = pygame.image.load(path)
@@ -208,6 +212,20 @@ class GraphicsProgram3D:
                                                    "scale": self.view_matrix.bound, 
                                                    "direction": newpos - self.view_matrix.eye,
                                                    "newpos": newpos})["direction"]
+        if self.inputs["Q"]:
+            newpos = self.view_matrix.roll(pi * delta_time)
+            self.view_matrix.eye += self.map.tree.move({"pos": self.view_matrix.eye, 
+                                                   "scale": self.view_matrix.bound, 
+                                                   "direction": newpos - self.view_matrix.eye,
+                                                   "newpos": newpos})["direction"]
+            if self.view_matrix.v.x < 0.005 and self.view_matrix.v.x > -0.005:
+                self.inputs["Q"] = False
+
+        if self.inputs["E"]:
+            self.reverse = False
+        if self.inputs["R"]:
+            self.reverse = True
+
         if self.inputs["JUMP"]:
             self.jump(delta_time)
 
@@ -221,7 +239,10 @@ class GraphicsProgram3D:
     # Creates a downwards acceleration
     def gravity(self, delta_time):
         # Increase the downward momentum
-        self.gv += -0.2 * delta_time
+        if(not self.reverse):
+            self.gv += -0.2 * delta_time
+        else:
+            self.gv += 0.2 * delta_time
         # Move to the gravity with respect to collision
         newpos = Point(self.view_matrix.eye.x, self.view_matrix.eye.y + self.gv, self.view_matrix.eye.z)
         player = self.map.tree.move({"pos": self.view_matrix.eye, 
@@ -288,6 +309,7 @@ class GraphicsProgram3D:
         # Stop the jump when it reaches the bottom of the 'curve' or hits something
         if self.v == -VELOCITY - 1 or (1,0,1) in player["collision"]:
             self.inputs["JUMP"] = False
+            self.inputs["Q"] = False
             self.v = VELOCITY
 
     def display(self):
@@ -472,6 +494,8 @@ class GraphicsProgram3D:
                         self.inputs["Q"] = True
                     if event.key == K_e:
                         self.inputs["E"] = True
+                    if event.key == K_r:
+                        self.inputs["R"] = True
                     if event.key == K_UP:
                         self.inputs["UP"] = True
                     if event.key == K_DOWN:
@@ -494,9 +518,12 @@ class GraphicsProgram3D:
                     if event.key == K_d:
                         self.inputs["D"] = False
                     if event.key == K_q:
-                        self.inputs["Q"] = False
+                        pass
+                        #self.inputs["Q"] = False
                     if event.key == K_e:
                         self.inputs["E"] = False
+                    if event.key == K_r:
+                        self.inputs["R"] = False
                     if event.key == K_UP:
                         self.inputs["UP"] = False
                     if event.key == K_DOWN:
@@ -514,6 +541,7 @@ class GraphicsProgram3D:
                     self.projectiles.append(
                         Projectile(self.view_matrix.eye, self.view_matrix.n, self.timer)
                     )
+
 
             self.update()
             self.display()
