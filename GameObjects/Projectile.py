@@ -10,7 +10,7 @@ class Projectile:
             time + (2 * sine),
             eye_pos,
             eye_pos + n_vec,
-            Point(eye_pos.x + ( n_vec.x + n_vec.x ), 0, eye_pos.z + ( n_vec.z + n_vec.z)))
+            Point(eye_pos.x + ( (n_vec.x + n_vec.x) * 4), 0, eye_pos.z + ( (n_vec.z + n_vec.z) * 4)))
         
         
 
