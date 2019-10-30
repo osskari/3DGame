@@ -291,9 +291,8 @@ class GraphicsProgram3D:
             self.v = VELOCITY
 
     def display(self):
-        print(self.view_matrix.eye)
         glClearColor(0.0, 0.0, 0.0, 1.0)
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+        glClear(GL_COLOR_BUFFER_BIT)
 
         glViewport(0, 0, 800, 600)
         self.model_matrix.load_identity()
@@ -313,7 +312,7 @@ class GraphicsProgram3D:
         self.sky_shader.set_model_matrix(self.model_matrix.matrix)
         self.sky_sphere.draw(self.sky_shader)
 
-        self.model_matrix.push_matrix()
+        self.model_matrix.pop_matrix()
         self.model_matrix.load_identity()
 
         self.shader.use()
@@ -336,7 +335,6 @@ class GraphicsProgram3D:
 
         self.shader.set_material_specular(0.4, 0.4, 0.4)
         self.shader.set_material_shininess(10)
-
 
         # Not using texture by default
         self.shader.set_using_texture(0.0)
@@ -376,19 +374,6 @@ class GraphicsProgram3D:
         # self.shader.set_diffuse_texture(1)
 
         # self.shader.set_using_texture(0.0)
-        # Player hand
-        '''
-        self.model_matrix.push_matrix()
-        self.shader.set_material_diffuse(1.0, 1.0, 1.0)
-        self.model_matrix.add_translation(self.view_matrix.eye.x + 0.0397, self.view_matrix.eye.y - 0.0622, self.view_matrix.eye.z - 0.0384)
-        self.model_matrix.add_x_rotation(self.hand_angle_x)
-        self.model_matrix.add_y_rotation(-0.4)
-        self.model_matrix.add_z_rotation(self.hand_angle_z)
-        self.model_matrix.add_scale(0.02, 0.1, 0.05)
-        self.shader.set_model_matrix(self.model_matrix.matrix)
-        self.cube.draw(self.shader)
-        self.model_matrix.pop_matrix()
-        '''
 
         # self.shader.set_material_diffuse(1.0, 1.0, 1.0)
         # self.model_matrix.push_matrix()
@@ -420,7 +405,6 @@ class GraphicsProgram3D:
         #         self.shader.set_model_matrix(self.model_matrix.matrix)
         #         self.cube.draw(self.shader)
         #         self.model_matrix.pop_matrix()
-
         pygame.display.flip()
 
     def draw_orbiting_objects(self):
@@ -460,8 +444,6 @@ class GraphicsProgram3D:
         self.model_matrix.pop_matrix()
 
 
-
-        pygame.display.flip()
 
         self.shader.set_using_texture(0.0)
         self.shader.set_using_specular_texture(0.0)
