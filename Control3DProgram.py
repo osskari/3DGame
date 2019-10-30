@@ -34,6 +34,9 @@ class GraphicsProgram3D:
         pygame.mouse.set_visible(False)
         pygame.event.set_grab(True)
 
+        self.sky_shader = SkyShader3D()
+        self.sky_shader.use()
+
         self.shader = Shader3D()
         self.shader.use()
 
@@ -49,6 +52,8 @@ class GraphicsProgram3D:
         self.cube = OptimizedCube()
 
         self.sphere = OptimizedSphere()
+
+        self.sky_sphere = SkySphere(128, 256)
 
         # Timer for bezier curves
         self.timer = 0.0
@@ -115,8 +120,10 @@ class GraphicsProgram3D:
             sys.path[0] + "/textures/2k_sun.jpg")
         self.texture_moon = self.load_texture(
             sys.path[0] + "/textures/2k_moon.jpg")
+        self.texture_sky = self.load_texture(
+            sys.path[0] + "/textures/sky_sphere_tex3.jpg")
+    
         self.bind_textures()
-
         self.sun = CircularObject(self.texture_sun, self.sunMotion.get_current_position(0), self.sunMotion)
         self.moon = CircularObject(self.texture_moon, self.moonMotion.get_current_position(0), self.moonMotion)
 
@@ -162,6 +169,8 @@ class GraphicsProgram3D:
         glBindTexture(GL_TEXTURE_2D, self.texture_sun)
         glActiveTexture(GL_TEXTURE4)
         glBindTexture(GL_TEXTURE_2D, self.texture_moon)
+        glActiveTexture(GL_TEXTURE5)
+        glBindTexture(GL_TEXTURE_2D, self.texture_sky)
 
     def update(self):
         delta_time = self.clock.tick() / 1000.0
@@ -282,17 +291,37 @@ class GraphicsProgram3D:
             self.v = VELOCITY
 
     def display(self):
-        glEnable(GL_DEPTH_TEST)
-
-        if self.white_background:
-            glClearColor(1.0, 1.0, 1.0, 1.0)
-        else:
-            glClearColor(0.0, 0.0, 0.0, 1.0)
+        print(self.view_matrix.eye)
+        glClearColor(0.0, 0.0, 0.0, 1.0)
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
         glViewport(0, 0, 800, 600)
+        self.model_matrix.load_identity()
+
+        glDisable(GL_DEPTH_TEST)
+
+        self.sky_shader.use()
+        self.sky_shader.set_diffuse_texture(5)
+        self.sky_shader.set_alpha_texture(None)
+
+        self.sky_shader.set_projection_matrix(self.projection_matrix.get_matrix())
+        self.sky_shader.set_view_matrix(self.view_matrix.get_matrix())
+        self.model_matrix.push_matrix()
+        self.model_matrix.add_translation(self.view_matrix.eye.x, self.view_matrix.eye.y, self.view_matrix.eye.z)
+        self.model_matrix.add_x_rotation(pi)
+        #self.model_matrix.add_z_rotation(pi / 2)
+        self.sky_shader.set_model_matrix(self.model_matrix.matrix)
+        self.sky_sphere.draw(self.sky_shader)
+
+        self.model_matrix.push_matrix()
+        self.model_matrix.load_identity()
+
+        self.shader.use()
+        glEnable(GL_DEPTH_TEST)
+        glClear(GL_DEPTH_BUFFER_BIT)
 
         self.shader.set_view_matrix(self.view_matrix.get_matrix())
+        self.shader.set_projection_matrix(self.projection_matrix.get_matrix())
 
         # self.shader.set_light_position(*self.view_matrix.eye)
         self.shader.set_eye_position(*self.view_matrix.eye)
@@ -308,7 +337,6 @@ class GraphicsProgram3D:
         self.shader.set_material_specular(0.4, 0.4, 0.4)
         self.shader.set_material_shininess(10)
 
-        self.model_matrix.load_identity()
 
         # Not using texture by default
         self.shader.set_using_texture(0.0)
@@ -430,6 +458,10 @@ class GraphicsProgram3D:
         self.shader.set_model_matrix(self.model_matrix.matrix)
         self.sphere.draw(self.shader)
         self.model_matrix.pop_matrix()
+
+
+
+        pygame.display.flip()
 
         self.shader.set_using_texture(0.0)
         self.shader.set_using_specular_texture(0.0)
