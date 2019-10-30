@@ -21,7 +21,16 @@ class Map:
                 "specular": (1, 1, 1),
                 "shininess": 13,
                 "type": "CUBE",
-                "texture": 1
+                "texture": None
+            },
+            {
+                "pos": Point(0, 40, 0),
+                "scale": (2, 2, 2),
+                "diffuse": (1, 1, 1),
+                "specular": (1, 1, 1),
+                "shininess": 13,
+                "type": "SPHERE",
+                "texture": None
             }
         ]
         self.tree = Collision(self.objects)
@@ -37,13 +46,13 @@ class Map:
 
     def draw(self, shader, model_matrix):
         for item in self.objects:
-            if not self.last or not self.last == item["type"]:
+            if (not self.last or not self.last == item["type"]) and item["type"] != "SPHERE":
                 self.types[item["type"]].set_vertices(shader)
             if item["texture"] is not None:
                 shader.set_using_texture(1.0)
+                shader.set_diffuse_texture(item["texture"])
             else:
                 shader.set_using_texture(0.0)
-            shader.set_diffuse_texture(item["texture"])
             model_matrix.push_matrix()
             shader.set_material_diffuse(*item["diffuse"])
             model_matrix.add_translation(*item["pos"])

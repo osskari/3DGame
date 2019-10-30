@@ -299,7 +299,7 @@ class GraphicsProgram3D:
         self.shader.set_sun_ambient(0.4, 0.4, 0.4)
 
         self.shader.set_moon_position(*self.moon.get_position(self.timer))
-        print(0x7d / 256, 0x7f / 256, 0x83 / 256)
+        # print(0x7d / 256, 0x7f / 256, 0x83 / 256)
         self.shader.set_moon_diffuse(0x7d / 256, 0x7f / 256, 0x83 / 256)
         self.shader.set_moon_specular(0x7d / 256, 0x7f / 256, 0x83 / 256)
         self.shader.set_moon_ambient(0x7d / 256, 0x7f / 256, 0x83 / 256)

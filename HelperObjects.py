@@ -19,12 +19,12 @@ class Collision:
     # Add object with position and scale to the tree
     # Sets the position as the value returned in case of collision
     def add_object(self, position, scale):
+        print(self.get_aabb(position, scale))
         self.tree.add(self.get_aabb(position, scale),
                       {"pos": position, "scale": scale})
 
     # Makes checking for collision on point easier
     def point_collision(self, point, bound):
-        print(point, bound)
         return self.tree.does_overlap(self.get_aabb(point, bound))
 
     # Returns the point object of collided objects
@@ -33,9 +33,7 @@ class Collision:
 
     # checks if player is between bounds of object on an axis with respect to size of both
     def is_between(self, player, obj, axis):
-        return obj["pos"][axis] - obj["scale"][axis] - player["scale"][axis]\
-            < player["pos"][axis]\
-            < obj["pos"][axis] + obj["scale"][axis] + player["scale"][axis]
+        return obj["pos"][axis] - obj["scale"][axis] < player["pos"][axis] < obj["pos"][axis] + obj["scale"][axis]
 
     # Finds which side of a cube the player is touching
     def get_colliding_face(self, player, obj):
@@ -65,6 +63,10 @@ class Collision:
             return player
         else:
             # If collision, get slide vector for each object collided with
+            print("player aabb:", player["pos"])
+            a = self.collision_objects(player["newpos"], player["scale"])
+            for i in a:
+                print(self.get_aabb(i["pos"], i["scale"]))
             for item in self.collision_objects(player["newpos"], player["scale"]):
                 player["direction"] = self.get_slide_vector(player, item)
                 player["collision"].append(
