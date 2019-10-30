@@ -46,8 +46,8 @@ class Map:
 
     def draw(self, shader, model_matrix):
         for item in self.objects:
-            if (not self.last or not self.last == item["type"]) and item["type"] != "SPHERE":
-                self.types[item["type"]].set_vertices(shader)
+            # if (not self.last or not self.last == item["type"]) and item["type"] != "SPHERE":
+            #     self.types[item["type"]].set_vertices(shader)
             if item["texture"] is not None:
                 shader.set_using_texture(1.0)
                 shader.set_diffuse_texture(item["texture"])

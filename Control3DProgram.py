@@ -21,6 +21,7 @@ from GameObjects.Sky import *
 
 from GameObjects.GameCube import GameCube
 from GameObjects.SandCube import SandCube
+from GameObjects.Projectile import Projectile
 
 
 class GraphicsProgram3D:
@@ -45,12 +46,12 @@ class GraphicsProgram3D:
         self.projection_matrix.set_perspective(pi / 2, 800 / 600, 0.5, 100)
         self.shader.set_projection_matrix(self.projection_matrix.get_matrix())
 
-        # self.cube = OptimizedCube()
+        self.cube = OptimizedCube()
 
-        # self.sphere = OptimizedSphere()
+        self.sphere = OptimizedSphere()
 
         # Timer for bezier curves
-        self.timer = 0
+        self.timer = 0.0
         self.clock = pygame.time.Clock()
         self.clock.tick()
 
@@ -102,7 +103,8 @@ class GraphicsProgram3D:
             "Q": False,
             "E": False,
             "JUMP": False,
-            "G": False
+            "G": False,
+            "CLICK": False
         }
 
         self.texture_id00_brick = self.load_texture(
@@ -130,6 +132,8 @@ class GraphicsProgram3D:
         self.first_move = True
 
         self.white_background = False
+
+        self.projectiles = []
 
     def load_texture(self, path):
         surface = pygame.image.load(path)
@@ -161,10 +165,12 @@ class GraphicsProgram3D:
 
     def update(self):
         delta_time = self.clock.tick() / 1000.0
+
         self.timer += delta_time
         self.angle += pi * delta_time
 
-        if self.inputs["G"] and not self.inputs["JUMP"]:
+
+        if self.timer != 0.0 and not self.inputs["JUMP"]:
             self.gravity(delta_time)
 
         if self.inputs["W"]:
@@ -293,16 +299,9 @@ class GraphicsProgram3D:
         self.shader.set_light_specular(0.2, 0.2, 0.2)
         self.shader.set_light_ambient(0.1, 0.1, 0.1)
 
-        self.shader.set_sun_position(*self.sun.get_position(self.timer))
-        self.shader.set_sun_diffuse(0.6, 0.6, 0.6)
-        self.shader.set_sun_specular(0.5, 0.5, 0.5)
-        self.shader.set_sun_ambient(0.4, 0.4, 0.4)
+        
 
-        self.shader.set_moon_position(*self.moon.get_position(self.timer))
-        # print(0x7d / 256, 0x7f / 256, 0x83 / 256)
-        self.shader.set_moon_diffuse(0x7d / 256, 0x7f / 256, 0x83 / 256)
-        self.shader.set_moon_specular(0x7d / 256, 0x7f / 256, 0x83 / 256)
-        self.shader.set_moon_ambient(0x7d / 256, 0x7f / 256, 0x83 / 256)
+        self.draw_orbiting_objects()
 
         self.shader.set_material_specular(0.4, 0.4, 0.4)
         self.shader.set_material_shininess(10)
@@ -369,34 +368,20 @@ class GraphicsProgram3D:
         # #self.cube.draw(self.shader)
         # self.model_matrix.pop_matrix()
 
-        # ######## Drawing spheres #########
-        # # Sun
-        # self.shader.set_using_texture(1.0)
-        # self.shader.set_diffuse_texture(self.sun.texture)
-        # self.shader.set_material_diffuse(*self.sun.diffuse)
-        # self.model_matrix.push_matrix()
-        # self.model_matrix.add_translation(*self.sun.get_position(self.timer))
-        # self.model_matrix.add_scale(5.0, 5.0, 5.0)
-        # self.shader.set_model_matrix(self.model_matrix.matrix)
-        # self.sphere.draw(self.shader)
-        # self.model_matrix.pop_matrix()
-        # # Moon
-        # self.shader.set_diffuse_texture(self.moon.texture)
-        # self.shader.set_material_diffuse(*self.moon.diffuse)
-        # self.model_matrix.push_matrix()
-        # self.model_matrix.add_translation(*self.moon.get_position(self.timer))
-        # self.model_matrix.add_scale(5.0, 5.0, 5.0)
-        # self.shader.set_model_matrix(self.model_matrix.matrix)
-        # self.sphere.draw(self.shader)
-        # self.model_matrix.pop_matrix()
-
-        ## Test
         # self.shader.set_diffuse_texture(self.texture_id01_graybrick)
         # self.shader.set_using_texture(1.0)
         # self.shader.set_using_specular_texture(0.0)
-        # self.shader.set_diffuse_texture(self.moon.texture)
-        # self.shader.set_material_diffuse(*self.moon.diffuse)
-        # self.cube.set_vertices(self.shader)
+        # ## Test
+        # for projectile in self.projectiles:
+        #     self.shader.set_material_diffuse(1.0, 1.0, 1.0)
+        #     self.model_matrix.push_matrix()
+        #     self.model_matrix.add_translation(*projectile.get_current_position(self.timer))
+        #     self.model_matrix.add_scale(0.4, 0.4, 0.4)
+        #     self.shader.set_model_matrix(self.model_matrix.matrix)
+        #     self.cube.draw(self.shader)
+        #     self.model_matrix.pop_matrix()
+
+        
         # for x in range(10):
         #     for z in range(10):
         #         self.model_matrix.push_matrix()
@@ -407,6 +392,45 @@ class GraphicsProgram3D:
         #         self.model_matrix.pop_matrix()
 
         pygame.display.flip()
+
+    def draw_orbiting_objects(self):
+        ######## Setting their lights #########
+        # Sun
+        self.shader.set_sun_position(*self.sun.get_position(self.timer))
+        self.shader.set_sun_diffuse(0.6, 0.6, 0.6)
+        self.shader.set_sun_specular(0.5, 0.5, 0.5)
+        self.shader.set_sun_ambient(0.4, 0.4, 0.4)
+
+        # Moon
+        self.shader.set_moon_position(*self.moon.get_position(self.timer))
+        self.shader.set_moon_diffuse(0x7d / 256, 0x7f / 256, 0x83 / 256)
+        self.shader.set_moon_specular(0x7d / 256, 0x7f / 256, 0x83 / 256)
+        self.shader.set_moon_ambient(0x7d / 256, 0x7f / 256, 0x83 / 256)
+
+        ######## Drawing spheres #########
+        self.shader.set_using_texture(1.0)
+        # Sun
+        self.shader.set_diffuse_texture(self.sun.texture)
+        self.shader.set_material_diffuse(*self.sun.diffuse)
+        self.model_matrix.push_matrix()
+        self.model_matrix.add_translation(*self.sun.get_position(self.timer))
+        self.model_matrix.add_scale(2.5, 2.5, 2.5)
+        self.shader.set_model_matrix(self.model_matrix.matrix)
+        self.sphere.draw(self.shader)
+        self.model_matrix.pop_matrix()
+
+        # Moon
+        self.shader.set_diffuse_texture(self.moon.texture)
+        self.shader.set_material_diffuse(*self.moon.diffuse)
+        self.model_matrix.push_matrix()
+        self.model_matrix.add_translation(*self.moon.get_position(self.timer))
+        self.model_matrix.add_scale(2.5, 2.5, 2.5)
+        self.shader.set_model_matrix(self.model_matrix.matrix)
+        self.sphere.draw(self.shader)
+        self.model_matrix.pop_matrix()
+
+        self.shader.set_using_texture(0.0)
+        self.shader.set_using_specular_texture(0.0)
 
     def program_loop(self):
         exiting = False
@@ -470,6 +494,10 @@ class GraphicsProgram3D:
                     if self.first_move:
                         self.mouse_move = (0, 0)
                         self.first_move = False
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    self.projectiles.append(
+                        Projectile(self.view_matrix.eye, self.view_matrix.n, self.timer)
+                    )
 
             self.update()
             self.display()
