@@ -13,7 +13,8 @@ class Map:
                 "specular": (1, 1, 1),
                 "shininess": 13,
                 "type": "CUBE",
-                "texture": 1
+                "texture": 1,
+                "goal": False
             },
             {
                 "pos": Point(10, 10, 0),
@@ -22,7 +23,8 @@ class Map:
                 "specular": (1, 1, 1),
                 "shininess": 13,
                 "type": "CUBE",
-                "texture": 1
+                "texture": 1,
+                "goal": False
             },
             {
                 "pos": Point(-20, 20, 0),
@@ -31,7 +33,8 @@ class Map:
                 "specular": (1, 1, 1),
                 "shininess": 13,
                 "type": "CUBE",
-                "texture": 1
+                "texture": 1,
+                "goal": False
             },
             {
                 "pos": Point(0, 40, 0),
@@ -40,7 +43,8 @@ class Map:
                 "specular": (1, 1, 1),
                 "shininess": 13,
                 "type": "CUBE",
-                "texture": 1
+                "texture": 1,
+                "goal": False
             },
             {
                 "pos": Point(0, 59.5, 0),
@@ -49,7 +53,8 @@ class Map:
                 "specular": (1, 1, 1),
                 "shininess": 13,
                 "type": "CUBE",
-                "texture": 1
+                "texture": 1,
+                "goal": False
             },
             {
                 "pos": Point(16, 70, 0),
@@ -58,7 +63,8 @@ class Map:
                 "specular": (1, 1, 1),
                 "shininess": 13,
                 "type": "CUBE",
-                "texture": 1
+                "texture": 1,
+                "goal": False
             },
             {
                 "pos": Point(35, 55, 0),
@@ -67,23 +73,44 @@ class Map:
                 "specular": (1, 1, 1),
                 "shininess": 13,
                 "type": "CUBE",
-                "texture": 1
+                "texture": 1,
+                "goal": False
+            },
+            {
+                "pos": Point(1000, 0, 1000),
+                "scale": (10, 0.5, 10),
+                "diffuse": (1, 1, 1),
+                "specular": (1, 1, 1),
+                "shininess": 13,
+                "type": "CUBE",
+                "texture": 1,
+                "goal": False
             },
         ]
         self.sun = CircularObject(
             sun["texture"], sun["currentpos"], sun["motion"])
         self.moon = CircularObject(
             moon["texture"], moon["currentpos"], moon["motion"])
+        self.goal = {
+            "pos": Point(35, 60, 0),
+            "scale": (3, 3, 3),
+            "diffuse": (1, 1, 1),
+            "specular": (1, 1, 1),
+            "shininess": 13,
+            "type": "SPHERE",
+            "texture": 2,
+            "goal": True
+        }
         self.tree = Collision(self.objects)
+        self.add_object(self.goal)
         self.types = {
             "CUBE": Cube(),
             "SPHERE": Sphere()
         }
-        self.last = None
 
     def add_object(self, obj):
-        self.objects.push(obj)
-        self.tree.add_object(obj["pos"], obj["scale"])
+        self.objects.append(obj)
+        self.tree.add_object(obj["pos"], obj["scale"], obj["goal"])
 
     def draw_orbiting_objects(self, shader, model_matrix, timer):
         ######## Setting their lights #########

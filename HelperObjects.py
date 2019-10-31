@@ -9,9 +9,10 @@ class Collision:
         if objects:
             for item in objects:
                 if item["type"] == "CUBE":
-                    self.add_object(item["pos"], (item["scale"][0]/2, item["scale"][1]/2, item["scale"][2]/2))
+                    self.add_object(
+                        item["pos"], (item["scale"][0]/2, item["scale"][1]/2, item["scale"][2]/2), item["goal"])
                 elif item["type"] == "SPHERE":
-                    self.add_object(item["pos"], item["scale"])
+                    self.add_object(item["pos"], item["scale"], item["goal"])
 
     # Returns AABB object with coorect values based on a point and offset
     def get_aabb(self, point, bound):
@@ -21,9 +22,9 @@ class Collision:
 
     # Add object with position and scale to the tree
     # Sets the position as the value returned in case of collision
-    def add_object(self, position, scale):
+    def add_object(self, position, scale, goal):
         self.tree.add(self.get_aabb(position, scale),
-                      {"pos": position, "scale": scale})
+                      {"pos": position, "scale": scale, "goal": goal})
 
     # Makes checking for collision on point easier
     def point_collision(self, point, bound):
@@ -69,7 +70,8 @@ class Collision:
                 player["direction"] = self.get_slide_vector(player, item)
                 player["collision"].append(
                     self.get_colliding_face(player, item))
-            print(player["collision"])
+                if item["goal"]:
+                    player["collision"].append((0,0,0))
             return player
 
 
