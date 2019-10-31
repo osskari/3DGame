@@ -150,41 +150,41 @@ class Map:
             {
                 "pos": Point(87.5, 95, -5),
                 "scale": (2, 2, 2),
-                "diffuse": (1, 0, 0),
-                "specular": (1, 0, 0),
+                "diffuse": (1, 1, 1),
+                "specular": (1, 1, 1),
                 "shininess": 13,
                 "type": "CUBE",
-                "texture": 1,
+                "texture": 2,
                 "goal": False
             },
             {
                 "pos": Point(110, 95, -5),
                 "scale": (2, 2, 2),
-                "diffuse": (1, 0, 0),
-                "specular": (1, 0, 0),
+                "diffuse": (1, 1, 1),
+                "specular": (1, 1, 1),
                 "shininess": 13,
                 "type": "CUBE",
-                "texture": 1,
+                "texture": 2,
                 "goal": False
             },
             {
                 "pos": Point(135, 95, 0),
                 "scale": (2, 2, 2),
-                "diffuse": (1, 0, 0),
-                "specular": (1, 0, 0),
+                "diffuse": (1, 1, 1),
+                "specular": (1, 1, 1),
                 "shininess": 13,
                 "type": "CUBE",
-                "texture": 1,
+                "texture": 2,
                 "goal": False
             },
             {
                 "pos": Point(160, 95, -5),
                 "scale": (2, 2, 2),
-                "diffuse": (1, 0, 0),
-                "specular": (1, 0, 0),
+                "diffuse": (1, 1, 1),
+                "specular": (1, 1, 1),
                 "shininess": 13,
                 "type": "CUBE",
-                "texture": 1,
+                "texture": 2,
                 "goal": False
             },
             {
@@ -239,7 +239,7 @@ class Map:
             "specular": (1, 1, 1),
             "shininess": 13,
             "type": "SPHERE",
-            "texture": 2,
+            "texture": 7,
             "goal": True
         }
         self.tree = Collision(self.objects)

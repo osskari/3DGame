@@ -107,6 +107,7 @@ class GraphicsProgram3D:
         self.texture_sky = self.load_texture(
             sys.path[0] + "/textures/sky_sphere_tex3.jpg")
         self.texture_win_sky = self.load_texture(sys.path[0] + "/textures/fireworks.jpg")
+        self.texture_earth = self.load_texture(sys.path[0] + "/textures/2k_earth_daymap.jpg")
     
         self.bind_textures()
         self.sun = CircularObject(
@@ -176,6 +177,9 @@ class GraphicsProgram3D:
         glBindTexture(GL_TEXTURE_2D, self.texture_sky)
         glActiveTexture(GL_TEXTURE6)
         glBindTexture(GL_TEXTURE_2D, self.texture_win_sky)
+        glActiveTexture(GL_TEXTURE7)
+        glBindTexture(GL_TEXTURE_2D, self.texture_earth)
+        
 
     def check_win(self, player):
         if (0,0,0) in player["collision"]:
