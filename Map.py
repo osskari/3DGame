@@ -58,7 +58,17 @@ class Map:
             },
             {
                 "pos": Point(16, 70, 0),
-                "scale": (0.5, 20, 10),
+                "scale": (0.5, 35, 30),
+                "diffuse": (1, 1, 1),
+                "specular": (1, 1, 1),
+                "shininess": 13,
+                "type": "CUBE",
+                "texture": 1,
+                "goal": False
+            },
+            {
+                "pos": Point(6, 87.5, 0),
+                "scale": (20, 0.5, 30),
                 "diffuse": (1, 1, 1),
                 "specular": (1, 1, 1),
                 "shininess": 13,
@@ -86,13 +96,134 @@ class Map:
                 "texture": 1,
                 "goal": False
             },
+            {
+                "pos": Point(45, 75, 10),
+                "scale": (10, 10, 0.5),
+                "diffuse": (1, 1, 1),
+                "specular": (1, 1, 1),
+                "shininess": 13,
+                "type": "CUBE",
+                "texture": 1,
+                "goal": False
+                
+            },
+            {
+                "pos": Point(45, 95, -10),
+                "scale": (10, 10, 0.5),
+                "diffuse": (1, 1, 1),
+                "specular": (1, 1, 1),
+                "shininess": 13,
+                "type": "CUBE",
+                "texture": 1,
+                "goal": False
+            },
+            {
+                "pos": Point(45, 115, 10),
+                "scale": (10, 10, 0.5),
+                "diffuse": (1, 1, 1),
+                "specular": (1, 1, 1),
+                "shininess": 13,
+                "type": "CUBE",
+                "texture": 1,
+                "goal": False
+            },
+            {
+                "pos": Point(45, 135, -5),
+                "scale": (10, 0.5, 10),
+                "diffuse": (1, 1, 1),
+                "specular": (1, 1, 1),
+                "shininess": 13,
+                "type": "CUBE",
+                "texture": 1,
+                "goal": False
+            },
+            {
+                "pos": Point(87.5, 95, -5),
+                "scale": (2, 2, 2),
+                "diffuse": (1, 0, 0),
+                "specular": (1, 0, 0),
+                "shininess": 13,
+                "type": "CUBE",
+                "texture": 1,
+                "goal": False
+            },
+            {
+                "pos": Point(110, 95, -5),
+                "scale": (2, 2, 2),
+                "diffuse": (1, 0, 0),
+                "specular": (1, 0, 0),
+                "shininess": 13,
+                "type": "CUBE",
+                "texture": 1,
+                "goal": False
+            },
+            {
+                "pos": Point(135, 95, 0),
+                "scale": (2, 2, 2),
+                "diffuse": (1, 0, 0),
+                "specular": (1, 0, 0),
+                "shininess": 13,
+                "type": "CUBE",
+                "texture": 1,
+                "goal": False
+            },
+            {
+                "pos": Point(160, 95, -5),
+                "scale": (2, 2, 2),
+                "diffuse": (1, 0, 0),
+                "specular": (1, 0, 0),
+                "shininess": 13,
+                "type": "CUBE",
+                "texture": 1,
+                "goal": False
+            },
+            {
+                "pos": Point(170, 105, -30),
+                "scale": (0.2, 5, 5),
+                "diffuse": (1, 1, 1),
+                "specular": (1, 1, 1),
+                "shininess": 13,
+                "type": "CUBE",
+                "texture": 1,
+                "goal": False
+            },
+            {
+                "pos": Point(150, 135, -55),
+                "scale": (0.2, 7.5, 7.5),
+                "diffuse": (1, 1, 1),
+                "specular": (1, 1, 1),
+                "shininess": 13,
+                "type": "CUBE",
+                "texture": 1,
+                "goal": False
+            },
+            {
+                "pos": Point(170, 155, -75),
+                "scale": (0.2, 7.5, 7.5),
+                "diffuse": (1, 1, 1),
+                "specular": (1, 1, 1),
+                "shininess": 13,
+                "type": "CUBE",
+                "texture": 1,
+                "goal": False
+            },
+            {
+                "pos": Point(160, 180, -110),
+                "scale": (20, 0.2, 20),
+                "diffuse": (1, 1, 1),
+                "specular": (1, 1, 1),
+                "shininess": 13,
+                "type": "CUBE",
+                "texture": 1,
+                "goal": False
+            }
         ]
         self.sun = CircularObject(
             sun["texture"], sun["currentpos"], sun["motion"])
         self.moon = CircularObject(
             moon["texture"], moon["currentpos"], moon["motion"])
         self.goal = {
-            "pos": Point(35, 60, 0),
+            "pos": Point(160, 190, -110),
             "scale": (3, 3, 3),
             "diffuse": (1, 1, 1),
             "specular": (1, 1, 1),

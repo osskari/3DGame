@@ -265,7 +265,7 @@ class GraphicsProgram3D:
 
     def gravity(self, delta_time):
         # Increase the downward momentum
-        self.gv += -0.2 * delta_time
+        self.gv += -0.3 * delta_time
         # Move to the gravity with respect to collision
         newpos = Point(self.view_matrix.eye.x,
                        self.view_matrix.eye.y + self.gv, self.view_matrix.eye.z)
