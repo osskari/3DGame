@@ -259,6 +259,7 @@ class GraphicsProgram3D:
             if self.is_win:
                 self.is_win = False
                 self.timer = 0
+                self.deaths = 0
 
     # Creates a downwards acceleration
 
