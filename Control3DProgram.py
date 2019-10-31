@@ -78,7 +78,6 @@ class GraphicsProgram3D:
             "CLICK": False
         }
 
-
         self.sunMotion = BezierMotion(
             -30,
             30,
@@ -101,7 +100,6 @@ class GraphicsProgram3D:
             Point(-50.0, -30.0, 0.0)
         )
 
-
         self.texture_id00_brick = self.load_texture(
             sys.path[0] + "/textures/bricks.jpg")
         self.texture_id01_graybrick = self.load_texture(
@@ -112,12 +110,14 @@ class GraphicsProgram3D:
             sys.path[0] + "/textures/2k_moon.jpg")
         self.texture_sky = self.load_texture(
             sys.path[0] + "/textures/sky_sphere_tex3.jpg")
-    
-        self.bind_textures()
-        self.sun = CircularObject(self.texture_sun, self.sunMotion.get_current_position(0), self.sunMotion)
-        self.moon = CircularObject(self.texture_moon, self.moonMotion.get_current_position(0), self.moonMotion)
 
-        self.map = Map({"texture": self.texture_sun, "currentpos": self.sunMotion.get_current_position(0), "motion": self.sunMotion}, 
+        self.bind_textures()
+        self.sun = CircularObject(
+            self.texture_sun, self.sunMotion.get_current_position(0), self.sunMotion)
+        self.moon = CircularObject(
+            self.texture_moon, self.moonMotion.get_current_position(0), self.moonMotion)
+
+        self.map = Map({"texture": self.texture_sun, "currentpos": self.sunMotion.get_current_position(0), "motion": self.sunMotion},
                        {"texture": self.texture_moon, "currentpos": self.moonMotion.get_current_position(0), "motion": self.moonMotion})
 
         # Velocity
@@ -131,10 +131,22 @@ class GraphicsProgram3D:
         # bool to ignore first mouse movement
         self.first_move = True
         self.can_jump = True
+        self.deaths = 0
 
         self.white_background = False
 
         self.projectiles = []
+
+    def drawText(self, position, textString, offset):
+        self.model_matrix.push_matrix()
+        font = pygame.font.Font(None, 32)
+        textSurface = font.render(
+            textString, True, (255, 255, 255, 255), (0, 0, 0, 255))
+        textData = pygame.image.tostring(textSurface, "RGBA", True)
+        glRasterPos2d(*position)
+        glDrawPixels(textSurface.get_width(), textSurface.get_height(),
+                     GL_RGBA, GL_UNSIGNED_BYTE, textData)
+        self.model_matrix.pop_matrix()
 
     def load_texture(self, path):
         surface = pygame.image.load(path)
@@ -177,42 +189,41 @@ class GraphicsProgram3D:
         self.timer += delta_time
         self.angle += pi * delta_time
 
-
         if self.inputs["W"]:
             newpos = self.view_matrix.walk(-10 * delta_time)
-            player = self.map.tree.move({"pos": self.view_matrix.eye, 
-                                                   "scale": self.view_matrix.bound, 
-                                                   "direction": newpos - self.view_matrix.eye,
-                                                   "newpos": newpos})
+            player = self.map.tree.move({"pos": self.view_matrix.eye,
+                                         "scale": self.view_matrix.bound,
+                                         "direction": newpos - self.view_matrix.eye,
+                                         "newpos": newpos})
             self.view_matrix.eye += player["direction"]
-            if self.inputs["JUMP"] and ((1,1,0) in player["collision"] or (0,1,1) in player["collision"]):
+            if self.inputs["JUMP"] and ((1, 1, 0) in player["collision"] or (0, 1, 1) in player["collision"]):
                 self.can_jump = True
         if self.inputs["S"]:
             newpos = self.view_matrix.walk(10 * delta_time)
-            player = self.map.tree.move({"pos": self.view_matrix.eye, 
-                                                   "scale": self.view_matrix.bound, 
-                                                   "direction": newpos - self.view_matrix.eye,
-                                                   "newpos": newpos})
+            player = self.map.tree.move({"pos": self.view_matrix.eye,
+                                         "scale": self.view_matrix.bound,
+                                         "direction": newpos - self.view_matrix.eye,
+                                         "newpos": newpos})
             self.view_matrix.eye += player["direction"]
-            if self.inputs["JUMP"] and ((1,1,0) in player["collision"] or (0,1,1) in player["collision"]):
+            if self.inputs["JUMP"] and ((1, 1, 0) in player["collision"] or (0, 1, 1) in player["collision"]):
                 self.can_jump = True
         if self.inputs["A"]:
             newpos = self.view_matrix.slide(-10 * delta_time, 0, 0)
-            player = self.map.tree.move({"pos": self.view_matrix.eye, 
-                                                   "scale": self.view_matrix.bound, 
-                                                   "direction": newpos - self.view_matrix.eye,
-                                                   "newpos": newpos})
+            player = self.map.tree.move({"pos": self.view_matrix.eye,
+                                         "scale": self.view_matrix.bound,
+                                         "direction": newpos - self.view_matrix.eye,
+                                         "newpos": newpos})
             self.view_matrix.eye += player["direction"]
-            if self.inputs["JUMP"] and ((1,1,0) in player["collision"] or (0,1,1) in player["collision"]):
+            if self.inputs["JUMP"] and ((1, 1, 0) in player["collision"] or (0, 1, 1) in player["collision"]):
                 self.can_jump = True
         if self.inputs["D"]:
             newpos = self.view_matrix.slide(10 * delta_time, 0, 0)
-            player = self.map.tree.move({"pos": self.view_matrix.eye, 
-                                                   "scale": self.view_matrix.bound, 
-                                                   "direction": newpos - self.view_matrix.eye,
-                                                   "newpos": newpos})
+            player = self.map.tree.move({"pos": self.view_matrix.eye,
+                                         "scale": self.view_matrix.bound,
+                                         "direction": newpos - self.view_matrix.eye,
+                                         "newpos": newpos})
             self.view_matrix.eye += player["direction"]
-            if self.inputs["JUMP"] and ((1,1,0) in player["collision"] or (0,1,1) in player["collision"]):
+            if self.inputs["JUMP"] and ((1, 1, 0) in player["collision"] or (0, 1, 1) in player["collision"]):
                 self.can_jump = True
         if self.inputs["JUMP"]:
             self.jump(delta_time)
@@ -224,19 +235,27 @@ class GraphicsProgram3D:
         self.mouse_angle_x = 0
         self.mouse_angle_y = 0
 
+        if (self.view_matrix.eye.y <= -30):
+            self.view_matrix.eye = Point(0, 0, 0)
+            self.view_matrix.look(
+                Point(0, 6, 10), Point(0, 0, 0), Vector(0, 1, 0))
+            self.deaths += 1
+
     # Creates a downwards acceleration
+
     def gravity(self, delta_time):
         # Increase the downward momentum
         self.gv += -0.2 * delta_time
         # Move to the gravity with respect to collision
-        newpos = Point(self.view_matrix.eye.x, self.view_matrix.eye.y + self.gv, self.view_matrix.eye.z)
-        player = self.map.tree.move({"pos": self.view_matrix.eye, 
-                                                "scale": self.view_matrix.bound, 
-                                                "direction": newpos - self.view_matrix.eye,
-                                                "newpos": newpos})
+        newpos = Point(self.view_matrix.eye.x,
+                       self.view_matrix.eye.y + self.gv, self.view_matrix.eye.z)
+        player = self.map.tree.move({"pos": self.view_matrix.eye,
+                                     "scale": self.view_matrix.bound,
+                                     "direction": newpos - self.view_matrix.eye,
+                                     "newpos": newpos})
         self.view_matrix.eye += player["direction"]
         # Reset the downwards velocity when player lands on an object
-        if (1,0,1) in player["collision"]:
+        if (1, 0, 1) in player["collision"]:
             self.gv = 0
 
     def mouse_look_movement(self, delta_time):
@@ -281,18 +300,18 @@ class GraphicsProgram3D:
         # Momentum = mass * velocity
         p = (self.m * self.v)
         # Change position
-        newpos = Point(self.view_matrix.eye.x, self.view_matrix.eye.y + (delta_time * p), self.view_matrix.eye.z)
-        player = self.map.tree.move({"pos": self.view_matrix.eye, 
-                                                "scale": self.view_matrix.bound, 
-                                                "direction": newpos - self.view_matrix.eye,
-                                                "newpos": newpos})
+        newpos = Point(self.view_matrix.eye.x, self.view_matrix.eye.y +
+                       (delta_time * p), self.view_matrix.eye.z)
+        player = self.map.tree.move({"pos": self.view_matrix.eye,
+                                     "scale": self.view_matrix.bound,
+                                     "direction": newpos - self.view_matrix.eye,
+                                     "newpos": newpos})
         self.view_matrix.eye += player["direction"]
         # Change velocity
         self.v = self.v - 13 * delta_time
 
-
         # Stop the jump when it reaches the bottom of the 'curve' or hits something
-        if self.v == -VELOCITY - 1 or (1,0,1) in player["collision"]:
+        if self.v == -VELOCITY - 1 or (1, 0, 1) in player["collision"]:
             self.inputs["JUMP"] = False
             self.v = VELOCITY
 
@@ -309,10 +328,12 @@ class GraphicsProgram3D:
         self.sky_shader.set_diffuse_texture(5)
         self.sky_shader.set_alpha_texture(None)
 
-        self.sky_shader.set_projection_matrix(self.projection_matrix.get_matrix())
+        self.sky_shader.set_projection_matrix(
+            self.projection_matrix.get_matrix())
         self.sky_shader.set_view_matrix(self.view_matrix.get_matrix())
         self.model_matrix.push_matrix()
-        self.model_matrix.add_translation(self.view_matrix.eye.x, self.view_matrix.eye.y, self.view_matrix.eye.z)
+        self.model_matrix.add_translation(
+            self.view_matrix.eye.x, self.view_matrix.eye.y, self.view_matrix.eye.z)
         self.model_matrix.add_x_rotation(pi)
         #self.model_matrix.add_z_rotation(pi / 2)
         self.sky_shader.set_model_matrix(self.model_matrix.matrix)
@@ -344,6 +365,8 @@ class GraphicsProgram3D:
 
         ################ DRAW #################
         self.map.draw(self.shader, self.model_matrix, self.timer)
+        self.drawText((-1, 0.93), "timer: {:1.2f}".format(self.timer), 0)
+        self.drawText((-1, 0.84), "deaths: %d" % self.deaths, -32)
 
         pygame.display.flip()
 
@@ -414,7 +437,8 @@ class GraphicsProgram3D:
                         self.first_move = False
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     self.projectiles.append(
-                        Projectile(self.view_matrix.eye, self.view_matrix.n, self.timer)
+                        Projectile(self.view_matrix.eye,
+                                   self.view_matrix.n, self.timer)
                     )
 
             self.update()
