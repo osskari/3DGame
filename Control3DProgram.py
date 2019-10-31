@@ -134,6 +134,7 @@ class GraphicsProgram3D:
         self.can_jump = True
         self.is_win = False
         self.deaths = 0
+        self.final_time = 0
 
         self.white_background = False
 
@@ -182,6 +183,13 @@ class GraphicsProgram3D:
         glActiveTexture(GL_TEXTURE6)
         glBindTexture(GL_TEXTURE_2D, self.texture_win_sky)
 
+    def check_win(self, player):
+        if (0,0,0) in player["collision"]:
+                self.view_matrix.eye = Point(1000, 5, 1000)
+                self.is_win = True
+                self.final_time = self.timer
+                self.inputs["JUMP"] = False
+
     def update(self):
         delta_time = self.clock.tick() / 1000.0
 
@@ -202,9 +210,7 @@ class GraphicsProgram3D:
             self.view_matrix.eye += player["direction"]
             if self.inputs["JUMP"] and ((1, 1, 0) in player["collision"] or (0, 1, 1) in player["collision"]):
                 self.can_jump = True
-            if (0,0,0) in player["collision"]:
-                self.view_matrix.eye = Point(1000, 5, 1000)
-                self.is_win = True
+            self.check_win(player)
         if self.inputs["S"]:
             newpos = self.view_matrix.walk(10 * delta_time)
             player = self.map.tree.move({"pos": self.view_matrix.eye,
@@ -214,9 +220,7 @@ class GraphicsProgram3D:
             self.view_matrix.eye += player["direction"]
             if self.inputs["JUMP"] and ((1, 1, 0) in player["collision"] or (0, 1, 1) in player["collision"]):
                 self.can_jump = True
-            if (0,0,0) in player["collision"]:
-                self.view_matrix.eye = Point(1000, 5, 1000)
-                self.is_win = True
+            self.check_win(player)
         if self.inputs["A"]:
             newpos = self.view_matrix.slide(-10 * delta_time, 0, 0)
             player = self.map.tree.move({"pos": self.view_matrix.eye,
@@ -226,9 +230,7 @@ class GraphicsProgram3D:
             self.view_matrix.eye += player["direction"]
             if self.inputs["JUMP"] and ((1, 1, 0) in player["collision"] or (0, 1, 1) in player["collision"]):
                 self.can_jump = True
-            if (0,0,0) in player["collision"]:
-                self.view_matrix.eye = Point(1000, 5, 1000)
-                self.is_win = True
+            self.check_win(player)
         if self.inputs["D"]:
             newpos = self.view_matrix.slide(10 * delta_time, 0, 0)
             player = self.map.tree.move({"pos": self.view_matrix.eye,
@@ -238,9 +240,7 @@ class GraphicsProgram3D:
             self.view_matrix.eye += player["direction"]
             if self.inputs["JUMP"] and ((1, 1, 0) in player["collision"] or (0, 1, 1) in player["collision"]):
                 self.can_jump = True
-            if (0,0,0) in player["collision"]:
-                self.view_matrix.eye = Point(1000, 5, 1000)
-                self.is_win = True
+            self.check_win(player)
         if self.inputs["JUMP"]:
             self.jump(delta_time)
 
@@ -256,6 +256,9 @@ class GraphicsProgram3D:
             self.view_matrix.look(
                 Point(0, 6, 10), Point(0, 0, 0), Vector(0, 1, 0))
             self.deaths += 1
+            if self.is_win:
+                self.is_win = False
+                self.timer = 0
 
     # Creates a downwards acceleration
 
@@ -273,9 +276,7 @@ class GraphicsProgram3D:
         # Reset the downwards velocity when player lands on an object
         if (1, 0, 1) in player["collision"]:
             self.gv = 0
-        if (0,0,0) in player["collision"]:
-            self.view_matrix.eye = Point(1000, 5, 1000)
-            self.is_win = True
+        self.check_win(player)
 
     def mouse_look_movement(self, delta_time):
         """
@@ -333,9 +334,7 @@ class GraphicsProgram3D:
         if self.v == -VELOCITY - 1 or (1, 0, 1) in player["collision"]:
             self.inputs["JUMP"] = False
             self.v = VELOCITY
-        if (0,0,0) in player["collision"]:
-            self.view_matrix.eye = Point(1000, 5, 1000)
-            self.is_win = True
+        self.check_win(player)
 
     def display(self):
         glClearColor(0.0, 0.0, 0.0, 1.0)
@@ -390,7 +389,10 @@ class GraphicsProgram3D:
 
         ################ DRAW #################
         self.map.draw(self.shader, self.model_matrix, self.timer)
-        self.drawText((-1, 0.93), "timer: {:1.2f}".format(self.timer), 0)
+        if self.is_win:
+            self.drawText((-1, 0.93), "timer: {:1.2f}".format(self.final_time), 0)
+        else:
+            self.drawText((-1, 0.93), "timer: {:1.2f}".format(self.timer), 0)
         self.drawText((-1, 0.84), "deaths: %d" % self.deaths, -32)
 
         pygame.display.flip()
