@@ -69,7 +69,6 @@ class Collision:
                 player["direction"] = self.get_slide_vector(player, item)
                 player["collision"].append(
                     self.get_colliding_face(player, item))
-            print(player["collision"])
             return player
 
 
